@@ -3,29 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>N333MO IS A RACIST</title>
-  <script>
-    // The sequence of text for the animated title
-    const titleSequence = ["N", "N3", "N33", "N333", "N333M", "N333MO", "N"];
-    let titleIndex = 0;
-
-    function animateTitle() {
-      // Update the document title
-      document.title = titleSequence[titleIndex];
-
-      // Move to the next index (loop back to 0 if at the end)
-      titleIndex = (titleIndex + 1) % titleSequence.length;
-
-      // Call this function again after a delay
-      setTimeout(animateTitle, 750); // Adjust speed by changing 300ms
-    }
-
-    // Start the title animation
-    window.onload = () => {
-      animateTitle(); // Start animated title
-      playRandomSong(); // Start playing random song
-    };
-  </script>
+  <title>N333MO</title>
   <style>
     /* General Reset */
     * {
@@ -34,7 +12,8 @@
       box-sizing: border-box;
     }
 
-    body {
+    body 
+    {
       font-family: 'Arial', sans-serif;
       background:#040305 ;
       color: #fff;
@@ -42,7 +21,8 @@
     }
 
     /* Wavy Background */
-    .background {
+    .background 
+    {
       position: absolute;
       top: 0;
       left: 0;
@@ -53,7 +33,8 @@
     }
 
     /* Card Container */
-    .card {
+    .card 
+    {
       width: 350px;
       margin: 350px auto;
       background: rgba(20, 20, 20, 0.2);
@@ -283,7 +264,30 @@
     const audioPlayer = document.getElementById("audioPlayer");
     audioPlayer.addEventListener("ended", playRandomSong);
   </script>
+    <script>
+        // The sequence of text for the animated title
+        const titleSequence = ["N", "N3", "N33", "N333", "N333M", "N333MO", "N"];
+        let titleIndex = 0;
+    
+        function animateTitle() {
+          // Update the document title
+          document.title = titleSequence[titleIndex];
+    
+          // Move to the next index (loop back to 0 if at the end)
+          titleIndex = (titleIndex + 1) % titleSequence.length;
+    
+          // Call this function again after a delay
+          setTimeout(animateTitle, 750); // Adjust speed by changing 300ms
+        }
+    
+        // Start the title animation
+        window.onload = () => {
+          animateTitle(); // Start animated title
+          playRandomSong(); // Start playing random song
+        };
+    </script>
 </body>
 </html>
+
 
 
