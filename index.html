@@ -3,7 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dark UI Template with Music</title>
+  <title>N333MO IS A RACIST</title>
+  <script>
+    // The sequence of text for the animated title
+    const titleSequence = ["N", "N3", "N33", "N333", "N333M", "N333MO", "N"];
+    let titleIndex = 0;
+
+    function animateTitle() {
+      // Update the document title
+      document.title = titleSequence[titleIndex];
+
+      // Move to the next index (loop back to 0 if at the end)
+      titleIndex = (titleIndex + 1) % titleSequence.length;
+
+      // Call this function again after a delay
+      setTimeout(animateTitle, 750); // Adjust speed by changing 300ms
+    }
+
+    // Start the title animation
+    window.onload = () => {
+      animateTitle(); // Start animated title
+      playRandomSong(); // Start playing random song
+    };
+  </script>
   <style>
     /* General Reset */
     * {
@@ -164,9 +186,36 @@
     color: #fff;
     box-shadow: 0 0 10px #ff00bf, 0 0 20px #af0e8c;
     }
+    #animatedText {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 3px solid #fff; /* Cursor effect */
+      width: 0; /* Start with no width for the animation */
+      animation: typing 4s steps(20, end), blink 0.8s step-end infinite alternate;
+    }
+
+    /* Typing effect */
+    @keyframes typing {
+      from {
+        width: 0; /* Start typing from nothing */
+      }
+      to {
+        width: 15ch; /* Adjust for the full text width */
+      }
+    }
+
+    /* Blinking cursor effect */
+    @keyframes blink {
+      from {
+        border-color: transparent;
+      }
+      to {
+        border-color: white;
+      }
+    }
   </style>
 </head>
-<body>w
+<body>
   <div class="background"></div>
 
   <div class="card">
@@ -188,8 +237,6 @@
     <div class="icons">
     </div>
   </div>
-
-  
 
   <!-- GIFs Section -->
   <div class="footer-icons">
@@ -235,10 +282,8 @@
     // Event Listener for when a song ends
     const audioPlayer = document.getElementById("audioPlayer");
     audioPlayer.addEventListener("ended", playRandomSong);
-
-    // Start playing a random song on page load
-    window.onload = playRandomSong;
   </script>
 </body>
 </html>
+
 
