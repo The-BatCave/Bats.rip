@@ -1,1 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark UI Template with Music</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background:#040305 ;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* Wavy Background */
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: #000;
+      z-index: -1;
+    }
+
+    /* Card Container */
+    .card {
+      width: 350px;
+      margin: 350px auto;
+      background: rgba(20, 20, 20, 0.2);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* User Info */
+    .user-info {
+      display: flex;
+      bottom: 33%;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .user-info img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+
+    .user-info .details {
+      font-size: 14px;
+    }
+
+    .user-info .details h3 {
+      margin-bottom: 5px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .user-info .details span {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Streaming Section */
+    .streaming {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(40, 40, 40, 0.);
+      border-radius: 10px;
+    }
+
+    .streaming img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
+    .streaming .details {
+      flex: 1;
+      margin-left: 15px;
+    }
+
+    .streaming .details h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .streaming .details p {
+      margin: 0;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Footer Icons */
+    .footer-icons {
+      display: flex;
+      justify-content: space-between;
+      position: absolute;
+      bottom: 33%;
+      width: 100%;
+    }
+
+    .footer-icons .gif-left,
+    .footer-icons .gif-right {
+      width: 400px;
+      height: 150px;
+      position: relative;
+    }
+
+    .footer-icons .gif-left {
+      margin-left: 320px;
+    }
+
+    .footer-icons .gif-right {
+      margin-right: 320px;
+      height: fit-content;
+    }
+
+    .footer-icons img {
+      width: 100%;
+      height: auto;
+      border-radius: 50px;
+    }
+
+    /* Glowing Effect */
+    .glow {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 0 10px #af0e8c, 0 0 20px #ff00bf, 0 0 30px #ff00bf;
+    }
+    .icons {
+    width: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 1px;
+    margin-top: 20px;
+    }
+
+    .icons .icon {
+    text-decoration: none;
+    font-size: 24px;
+    color: white;
+    background: rgba(40, 40, 40, 0.8);
+    padding: 10px;
+    border-radius: 50%;
+    }
+
+    .icons .icon:hover {
+    background: #af0e8c; /* Add a glowing effect */
+    color: #fff;
+    box-shadow: 0 0 10px #ff00bf, 0 0 20px #af0e8c;
+    }
+  </style>
+</head>
+<body>w
+  <div class="background"></div>
+
+  <div class="card">
+    <div class="user-info">
+      <img src="/Photos/pfp.jpg" alt="User Avatar">
+      <div class="details">
+        <h3 class="glow">N333MO</h3>
+        <span>  333</span>
+      </div>
+    </div>
+
+    <div class="streaming">
+      <img src="/Photos/MusicPFP.png" alt="Stream Avatar">
+      <div class="details">
+        <h4 id="song-title">Streaming Random Track</h4>
+        <p></p>
+      </div>
+    </div>
+    <div class="icons">
+    </div>
+  </div>
+
+  
+
+  <!-- GIFs Section -->
+  <div class="footer-icons">
+    <div class="gif-left">
+      <img src="Gifs/N333MO BACKGROUND Left.gif" alt="Left Animation">
+    </div>
+    <div class="gif-right">
+      <img src="Gifs/N333MO BACKGROUND Left.gif" alt="Right Animation">
+    </div>
+  </div>
+
+  <audio id="audioPlayer" autoplay hidden></audio>
+
+  <script>
+    // List of songs in the folder
+    const songs = [
+      { name: "osamason - my bad", path: "songs/song1.mp3" },
+      { name: "PlayBoi Carti - PVRIS", path: "songs/song2.mp3" },
+      { name: "Protect - Stars In My Ceilings", path: "songs/song3.mp3" },
+      { name: "Lil Uzi Vert - Blow Da Whistle", path: "songs/song4.mp3" },
+      { name: "osamason - NO MANNERS", path: "songs/song5.mp3" },
+      { name: "NETTSPEND - SHUT UP", path: "songs/song6.mp3" }
+      // Add more song objects here
+    ];
+
+    // Play a random song
+    function playRandomSong() {
+      const randomIndex = Math.floor(Math.random() * songs.length);
+      const selectedSong = songs[randomIndex];
+
+      // Set the audio source
+      const audioPlayer = document.getElementById("audioPlayer");
+      audioPlayer.src = selectedSong.path;
+
+      // Update the song title
+      const songTitle = document.getElementById("song-title");
+      songTitle.textContent = selectedSong.name;
+
+      // Start playback
+      audioPlayer.play();
+    }
+
+    // Event Listener for when a song ends
+    const audioPlayer = document.getElementById("audioPlayer");
+    audioPlayer.addEventListener("ended", playRandomSong);
+
+    // Start playing a random song on page load
+    window.onload = playRandomSong;
+  </script>
+</body>
+</html>
 
