@@ -14,10 +14,35 @@
 
     body {
       font-family: 'Arial', sans-serif;
-      background: url("Gifs/Background.gif");
       background-size: cover;
       color: #fff;
+      cursor: url(cursor/cursor.png), auto;
       overflow: hidden;
+    }
+
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    video {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
     }
 
     /* Wavy Background */
@@ -35,14 +60,15 @@
     .card {
       width: 350px;
       margin: 350px auto;
-      background: rgba(20, 20, 20, 0.2);
+      background: rgba(20, 20, 20, 0.0);
       border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.0);
     }
 
     /* User Info */
     .user-info {
+      position: relative;
       display: flex;
       bottom: 33%;
       align-items: center;
@@ -50,23 +76,29 @@
     }
 
     .user-info img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      margin-right: 15px;
+      transform: translate(90px);
+      width: 120px;
+      height: 120px;
+      margin: 1px;
+      align-items: center;
+      border-radius: 0px;
     }
-
+    
     .user-info .details {
       font-size: 14px;
     }
 
-    .user-info .details h3 {
+    .user-info .details h6 
+    {
+      transform: translate(90px);
+      align-items: center;
       margin-bottom: 5px;
       font-size: 18px;
       font-weight: bold;
     }
 
     .user-info .details span {
+      transform: translate(90px);
       font-size: 12px;
       color: #aaa;
     }
@@ -104,21 +136,6 @@
       color: #aaa;
     }
 
-    /* Icons Section */
-    .icons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .icons img {
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
     
     #animatedText {
       overflow: hidden;
@@ -127,23 +144,76 @@
       width: 0; /* Start with no width for the animation */
       animation: typing 4s steps(20, end), blink 0.8s step-end infinite alternate;
     }
-    .glow-Username {
-      font-size: 48px;
-      color: white;
-      text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
-      background-color: black; /* Optional for better contrast */
+
+    .details {
+  position: relative;
+  display: inline-block; /* Ensures elements stack properly */
+}
+
+
+.glowing-text
+{
+  transform: translate(60px);
+  color: white;
+  text-shadow: 0 0 10px #ffffff, 0 0 20px #000000, 0 0 30px #ffffff;
+  background-color: transparent;
+}
+.glow-Username {
+  transform: translate(60px);
+  font-size: 48px;
+  color: white;
+  text-shadow: 0 0 10px #ffffff, 0 0 20px #000000, 0 0 30px #ffffff;
+  background-color: transparent;
+}
+
+.sparkle-text {
+  transform: translate(60px);
+  position: absolute; /* Overlay the image */
+  top: 50%; /* Adjust based on placement */
+  left: 50%; /* Adjust based on placement */
+  transform: translate(-50px, -50%); /* Center the sparkles under the text */
+  width: 200px; /* Adjust size as needed */
+  height: 75px;
+}
+
+
+    @keyframes sparkle {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 100% 100%;
+      }
     }
 
     .glow-Socials {
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
-      }
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
 
-      .glow-Socials:hover {
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-        transform: scale(1.25); /* Slightly enlarges the icon */
-        cursor: pointer;
-      }
+.glow-Socials:hover {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+  transform: scale(1.4); /* Slightly enlarges the icon */
+  cursor: pointer;
+}
 
+.icons {
+  display: flex; /* Ensure children are flex-enabled */
+  justify-content: center; /* Center align icons */
+  gap: 50px; /* Reduce excessive spacing */
+  margin-top: 20px;
+}
+
+.icons img {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  transition: transform 0.3s ease; /* Smooth transition for hover */
+}
+
+.icons img:hover {
+  transform: scale(1.2); /* Slightly enlarges on hover */
+  cursor: pointer;
+}
     /* Typing effect */
     @keyframes typing {
       from {
@@ -166,23 +236,28 @@
   </style>
 </head>
 <body>
+  <div class="video-background">
+    <video autoplay muted loop>
+      <source src="Gifs/Newest-Background.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  
   <div class="background"></div>
 
   <div class="card">
     <div class="user-info">
-      <img src="/Photos/pfp.jpg" alt="User Avatar">
-      <div class="details">
-        <h3 class="glow-Username">N333MO</h3>
-        <span>333</span>
-      </div>
+      <img src="/Photos/Cross-PFP.png" alt="User Avatar">
     </div>
 
-    <div class="streaming">
-      <img src="/Photos/MusicPFP.png" alt="Stream Avatar">
-      <div class="details">
-        <h4 id="song-title">Streaming Random Track</h4>
-        <p></p>
-      </div>
+    <div class="details">
+      <h6 class="glow-Username">N333MO</h6>
+      <img class="sparkle-text" src="Photos/Sparkles.gif" alt="Sparkles">
+    </div>
+    
+
+    <div class="threetext">
+      <p, class="glowing-text"></p>
     </div>
 
     <!-- Icons Section -->
@@ -194,12 +269,7 @@
   <script>
     // List of songs in the folder
     const songs = [
-      { name: "osamason - my bad", path: "songs/song1.mp3" },
-      { name: "PlayBoi Carti - PVRIS", path: "songs/song2.mp3" },
-      { name: "Protect - Stars In My Ceilings", path: "songs/song3.mp3" },
-      { name: "Lil Uzi Vert - Blow Da Whistle", path: "songs/song4.mp3" },
-      { name: "osamason - NO MANNERS", path: "songs/song5.mp3" },
-      { name: "NETTSPEND - SHUT UP", path: "songs/song6.mp3" }
+      { name: "Gorillaz - On Melancholy Hill", path: "songs/song1.mp3" },
     ];
 
     // Play a random song
@@ -225,8 +295,9 @@
 
     // Add dynamic clickable icons
     const icons = [
-      { image: "Photos/X.png", link: "https://www.x.com/n333mo_" },
-      { image: "https://clipzy.org/home/img/Twitch.png", link: "https://www.Twitch.tv/n333mo_" },
+      { image: "https://cdn.discordapp.com/attachments/1255692212717752513/1316463395666526269/ezgif-6-7525f9786a.gif?ex=6787f694&is=6786a514&hm=732d197bc2236360e203db2346dd416ef503e38a6e2235ffd8092ca6a0b785f5&", link: "https://www.x.com/n333mo_" },
+      { image: "https://cdn.discordapp.com/attachments/1255692212717752513/1316463396383883265/ezgif-3-b6c4bef8a4.gif?ex=6787f694&is=6786a514&hm=1378a85b3970df63a48e0abdacb012053556f99e97d741a22ff3f61f5a8abd93&", link: "https://www.Twitch.tv/n333mo_" },
+      { image: "Photos/WebBrowser.png", link: "https://guns.lol/2ft"}
     ];
 
     const iconContainer = document.getElementById("icon-container");
