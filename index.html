@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>N333MO's Desktop</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+    
+    .boot-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      background: #000;
+      opacity: 1;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .bat-logo {
+      width: 200px;
+      height: 120px;
+      margin-bottom: 40px;
+    }
+    
+    .bat-logo svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 10px rgba(0, 191, 255, 0.8));
+    }
+    
+    .bat-logo path {
+      fill: #111;
+      stroke: #00bfff;
+      stroke-width: 2;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawBat 1.5s forwards, glowBat 1.5s 1.5s infinite alternate;
+    }
+    
+    @keyframes drawBat {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+    
+    @keyframes glowBat {
+      from {
+        filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.8));
+        fill: #111;
+      }
+      to {
+        filter: drop-shadow(0 0 20px rgba(0, 191, 255, 1));
+        fill: rgba(0, 191, 255, 0.3);
+      }
+    }
+    
+    .boot-text {
+      color: #00bfff;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.3s 0.3s forwards;
+    }
+    
+    .loading-bar {
+      width: 300px;
+      height: 4px;
+      background-color: #222;
+      border-radius: 2px;
+      margin-top: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .loading-progress {
+      height: 100%;
+      width: 0%;
+      background-color: #00bfff;
+      position: absolute;
+      animation: loadProgress 1.5s ease-in-out forwards;
+      box-shadow: 0 0 10px #00bfff;
+    }
+    
+    .boot-status {
+      color: #666;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 10px;
+      height: 15px;
+      text-align: center;
+    }
+    
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+    
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      20% { width: 20%; }
+      40% { width: 38%; }
+      50% { width: 52%; }
+      60% { width: 65%; }
+      80% { width: 85%; }
+      95% { width: 98%; }
+      100% { width: 100%; }
+    }
+    
+    /* Login Page Styles */
+    .login-container {
+      position: relative;
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 110%;
+      height: 110%;
+      background: url('photos/Default-Batman.jpg') center/cover;
+      filter: blur(15px);
+      transform: scale(1.1);
+      z-index: -1;
+    }
+
+    .sticky-note {
+      position: absolute;
+      top: 20px;
+      background-color: #ffc;
+      color: #000;
+      padding: 15px;
+      width: 200px;
+      transform: rotate(-2deg);
+      font-family: 'Comic Sans MS', cursive;
+    }
+    
+    .login-form {
+      background-color: #111;
+      padding: 30px;
+      border-radius: 8px;
+      width: 300px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #ccc;
+    }
+    
+    input {
+      width: 92%;
+      padding: 10px;
+      background-color: #222;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 4px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #444;
+    }
+    
+    /* Welcome Screen Styles */
+    .welcome-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1001;
+      color: white;
+      text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff;
+      font-size: 3rem;
+      transition: opacity 1s ease;
+    }
+    
+    /* Terminal effect for boot sequence */
+    .terminal-text {
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.4;
+      text-align: left;
+      width: 80%;
+      max-width: 600px;
+      margin: 0 auto;
+      opacity: 1;
+      height: auto;
+      overflow: hidden;
+    }
+    
+    .terminal-line {
+      margin: 4px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+    }
+    
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    
+    .blink {
+      animation: blink-animation 1s steps(5, start) infinite;
+    }
+    
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+    
+    /* Desktop Styles */
+    .desktop {
+      display: none;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .taskbar {
+      opacity: 75%;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 40px;
+      background-color: rgba(34, 34, 34, 0.9);
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      justify-content: center;
+    }
+    
+    .start-button {
+      background-color: #333;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 3px;
+      margin-right: 15px;
+      cursor: pointer;
+    }
+    
+    .desktop-icons {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 80px);
+      grid-gap: 20px;
+    }
+    
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: white;
+      text-align: center;
+      cursor: pointer;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    
+    .icon-image {
+      width: 50px;
+      height: 50px;
+      background-color: rgba(68, 68, 68, 0.7);
+      border-radius: 5px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .icon-text {
+      font-size: 12px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Settings Window Styles */
+    .settings-window {
+      position: absolute;
+      width: 600px;
+      background-color: rgba(24, 24, 27, 0.95);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: none;
+      color: white;
+      z-index: 100;
+      border: 1px solid rgba(63, 63, 70, 0.5);
+      overflow: hidden;
+    }
+
+    .settings-header {
+      background-color: rgba(39, 39, 42, 0.8);
+      padding: 16px 24px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+      border-bottom: 1px solid rgba(63, 63, 70, 0.5);
+    }
+
+    .settings-title {
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .settings-content {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .settings-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .settings-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+    }
+
+    .settings-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    .settings-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .settings-section {
+      margin-bottom: 32px;
+      padding: 20px;
+      background: rgba(39, 39, 42, 0.5);
+      border-radius: 8px;
+    }
+
+    .settings-section h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #fff;
+      font-size: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+    }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 0;
+    }
+
+    .volume-icon {
+      font-size: 16px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .volume-slider {
+      flex-grow: 1;
+      height: 6px;
+      background: #444;
+      border-radius: 3px;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .volume-value {
+      min-width: 50px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .background-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .background-option {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .background-option:hover {
+      transform: scale(1.03);
+    }
+
+    .background-option.active {
+      border-color: #fff;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+    }
+
+    .background-image {
+      aspect-ratio: 16/9;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .background-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .background-option.active::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    }
+    
+    /* File Explorer Windows */
+    .window {
+      position: absolute;
+      background-color: rgba(51, 51, 51, 0.95);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      min-width: 400px;
+      min-height: 300px;
+      backdrop-filter: blur(10px);
+      display: none;
+      color: white;
+      z-index: 100;
+    }
+    
+    .window-header {
+      background-color: rgba(68, 68, 68, 0.8);
+      padding: 10px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+    
+    .window-title {
+      font-weight: bold;
+    }
+    
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .window-button {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #333;
+    }
+    
+    .minimize {
+      background-color: #ffbd44;
+    }
+    
+    .maximize {
+      background-color: #00ca4e;
+    }
+    
+    .close {
+      background-color: #ff605c;
+    }
+    
+    .window-content {
+      padding: 15px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .file-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+    
+    .file-icon:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .file-icon-image {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .file-icon-text {
+      font-size: 12px;
+      text-align: center;
+      word-break: break-word;
+    }
+    
+    /* Music Player Styles */
+    .taskbar-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .music-player {
+      position: absolute;
+      width: 600px;
+      height: 500px;
+      background-color: rgba(18, 18, 18, 0.95);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: none;
+      color: white;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .music-player-header {
+      background-color: rgba(40, 40, 40, 0.8);
+      padding: 15px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+      border-bottom: 1px solid #333;
+    }
+
+    .music-player-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .music-player-content {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 50px);
+    }
+
+    .song-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .song-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .song-list::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .song-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    .song-item {
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 8px;
+    }
+
+    .song-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .song-item.active {
+      background-color: rgba(30, 215, 96, 0.2);
+    }
+
+    .song-thumbnail {
+      width: 60px;
+      height: 60px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
+    .song-info {
+      flex: 1;
+      white-space: normal;
+      overflow: visible;
+    }
+
+    .song-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .song-artist {
+      font-size: 14px;
+      color: #b3b3b3;
+    }
+
+    .player-footer {
+      background-color: rgba(24, 24, 24, 0.9);
+      padding: 15px;
+      border-top: 1px solid #333;
+    }
+
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .now-playing-thumbnail {
+      width: 56px;
+      height: 56px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
+    .now-playing-info {
+      flex: 1;
+    }
+
+    .now-playing-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    .now-playing-artist {
+      font-size: 12px;
+      color: #b3b3b3;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 4px;
+      background-color: #535353;
+      border-radius: 2px;
+      margin: 10px 0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #1DB954;
+      border-radius: 2px;
+      width: 0;
+    }
+
+    .progress-bar:hover {
+      background-color: #1ed760;
+    }
+
+    .progress-time {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #b3b3b3;
+      margin-bottom: 10px;
+    }
+
+    .player-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .control-button {
+      background-color: transparent;
+      border: none;
+      color: #b3b3b3;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .control-button:hover {
+      color: #fff;
+    }
+
+    .play-button {
+      background-color: #fff;
+      color: #000;
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+
+    .play-button:hover {
+      transform: scale(1.05);
+      background-color: #fff;
+      color: #000;
+    }
+
+    .now-playing-text {
+      position: absolute;
+      left: 90%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+
+    /* Image Viewer Styles */
+    .image-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      flex-direction: column;
+    }
+
+    .image-container {
+      position: relative;
+      max-width: 90%;
+      max-height: 80%;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border: 2px solid #444;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .image-title {
+      color: white;
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .close-image {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Text Editor Styles */
+    .text-editor {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      background-color: rgba(51, 51, 51, 0.95);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      display: none;
+      color: white;
+      z-index: 2000;
+      overflow: hidden;
+    }
+
+    .text-editor-header {
+      background-color: rgba(68, 68, 68, 0.8);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #444;
+    }
+
+    .text-editor-title {
+      font-weight: bold;
+    }
+
+    .text-editor-content {
+      padding: 15px;
+    }
+
+    .text-editor textarea {
+      width: 100%;
+      height: 300px;
+      background-color: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      resize: none;
+      border-radius: 4px;
+    }
+
+    .text-editor-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .text-editor-button {
+      padding: 8px 15px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .text-editor-button:hover {
+      background-color: #555;
+    }
+
+    .save-button {
+      background-color: #0078d7;
+    }
+
+    .save-button:hover {
+      background-color: #0086f0;
+    }
+    
+    /* Video Player Styles */
+    .video-viewer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      flex-direction: column;
+    }
+    
+    .video-container {
+      position: relative;
+      max-width: 90%;
+      max-height: 80%;
+    }
+    
+    .video-container video {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border: 2px solid #444;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .video-title {
+      color: white;
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    
+    .close-video {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Boot Animation -->
+  <div class="boot-animation" id="bootAnimation">
+    <div class="bat-logo">
+      <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+        <path d="M300,60 C380,60 450,80 500,120 C470,80 450,40 430,20 C410,40 380,50 300,50 C220,50 190,40 170,20 C150,40 130,80 100,120 C150,80 220,60 300,60 Z" />
+      </svg>
+    </div>
+    <div class="boot-text">INITIALIZING...</div>
+    <div class="loading-bar">
+      <div class="loading-progress"></div>
+    </div>
+    <div class="boot-status" id="bootStatus"></div>
+  </div>
+  
+  <!-- Login Page -->
+  <div class="login-container" id="loginContainer">
+    <div class="sticky-note">
+      Password: 3334L
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" value="Bruce Wayne" readonly>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+      </div>
+      <button id="loginButton">Login</button>
+    </div>
+  </div>
+  
+  <!-- Desktop -->
+  <div class="desktop" id="desktop">
+    <div class="welcome-overlay" id="welcomeOverlay">
+      <div id="welcomeText"></div>
+    </div>
+    <div class="desktop-icons">
+      <div class="icon" data-folder="documents">
+        <div class="icon-image">📁</div>
+        <div class="icon-text">Documents</div>
+      </div>
+      <div class="icon" data-folder="pictures">
+        <div class="icon-image">📁</div>
+        <div class="icon-text">Pictures</div>
+      </div>
+      <div class="icon" data-folder="apps">
+        <div class="icon-image">📁</div>
+        <div class="icon-text">Applications</div>
+      </div>
+      <div class="icon" id="settingsIcon">
+        <div class="icon-image">⚙️</div>
+        <div class="icon-text">Settings</div>
+      </div>
+    
+    </div>
+
+    <!-- Settings Window -->
+    <div class="settings-window" id="settingsWindow">
+      <div class="settings-header">
+        <div class="settings-title">Settings</div>
+        <div class="window-controls">
+          <button class="window-button minimize">-</button>
+          <button class="window-button maximize">□</button>
+          <button class="window-button close">×</button>
+        </div>
+      </div>
+      <div class="settings-content">
+        <div class="settings-section">
+          <h3>Volume Control</h3>
+          <div class="volume-control">
+            <span class="volume-icon">🔈</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+            <span id="volumeValue" class="volume-value">50%</span>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>Desktop Background</h3>
+          <div class="background-grid">
+            <div class="background-option active" data-bg="photos/Default-Batman.jpg">
+              <img src="photos/Default-Batman.jpg" alt="Dark City" class="background-image">
+              <div class="background-label">Cover 1</div>
+            </div>
+            <div class="background-option" data-bg="photos/badbih.png">
+              <img src="photos/badbih.png" alt="Night Skyline" class="background-image">
+              <div class="background-label">Cover 2</div>
+            </div>
+            <div class="background-option" data-bg="photos/Forest.png">
+              <img src="photos/Forest.png" alt="Rainy Night" class="background-image">
+              <div class="background-label">Cover 3</div>
+            </div>
+            <div class="background-option" data-bg="photos/batman4.jpg">
+              <img src="photos/batman4.jpg" alt="Tech Hub" class="background-image">
+              <div class="background-label">Cover 4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- File Explorer Windows -->
+    <div class="window" id="documentsWindow">
+      <div class="window-header">
+        <div class="window-title">Documents</div>
+        <div class="window-controls">
+          <button class="window-button minimize">-</button>
+          <button class="window-button maximize">□</button>
+          <button class="window-button close">×</button>
+        </div>
+      </div>
+      <div class="window-content">
+        <div class="file-icon" data-file="secret_plans.txt" data-type="text">
+          <div class="file-icon-image">📄</div>
+          <div class="file-icon-text">secret_plans.txt</div>
+        </div>
+        <div class="file-icon" data-file="Plans To Kill Lydell.doc" data-type="text">
+          <div class="file-icon-image">📄</div>
+          <div class="file-icon-text">Plans To Kill Lydell.doc</div>
+        </div>
+        <div class="file-icon" data-file="Credits.txt" data-type="text">
+          <div class="file-icon-image">📄</div>
+          <div class="file-icon-text">Credits.txt</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="window" id="picturesWindow">
+      <div class="window-header">
+        <div class="window-title">Pictures</div>
+        <div class="window-controls">
+          <button class="window-button minimize">-</button>
+          <button class="window-button maximize">□</button>
+          <button class="window-button close">×</button>
+        </div>
+      </div>
+      <div class="window-content">
+        <div class="file-icon" data-file="family_photo.jpg" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Randal.jpg</div>
+        </div>
+        <div class="file-icon" data-file="batmobile.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Fine Shyt.png</div>
+        </div>
+        <div class="file-icon" data-file="tripout.gif" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Tripout.jpg</div>
+        </div>
+        <div class="file-icon" data-file="yungthug.mp4" data-type="video">
+          <div class="file-icon-image">📹</div>
+          <div class="file-icon-text">Young Thug.mp4</div>
+        </div>
+        <div class="file-icon" data-file="zebra.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Zebra.png</div>
+        </div>
+        <div class="file-icon" data-file="N333MO.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Self Portrait.png</div>
+        </div>
+        <div class="file-icon" data-file="LOSSAVE.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Los Save Us.png</div>
+        </div>
+        <div class="file-icon" data-file="Blat.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Blatt.png</div>
+        </div>
+        <div class="file-icon" data-file="Dawg.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">Dawg.png</div>
+        </div>
+        <div class="file-icon" data-file="OneOfDem.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">One Of Them Nights.png</div>
+        </div>
+        <div class="file-icon" data-file="DownyTwo.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">asalamalakim.png</div>
+        </div>
+        <div class="file-icon" data-file="BadBihBeat.png" data-type="image">
+          <div class="file-icon-image">🖼️</div>
+          <div class="file-icon-text">My Dreams.png</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Video Viewer -->
+    <div class="video-viewer" id="videoViewer">
+      <button class="close-video" id="closeVideo">&times;</button>
+      <div class="video-container">
+        <video id="playerVideo" controls></video>
+      </div>
+      <div class="video-title" id="videoTitle"></div>
+    </div>
+
+    <div class="window" id="appsWindow">
+      <div class="window-header">
+        <div class="window-title">Applications</div>
+        <div class="window-controls">
+          <button class="window-button minimize">-</button>
+          <button class="window-button maximize">□</button>
+          <button class="window-button close">×</button>
+        </div>
+      </div>
+      <div class="window-content">
+        <div class="file-icon" data-url="https://twitter.com/n333mo_">
+          <div class="file-icon-image">🐤</div>
+          <div class="file-icon-text">twitter.exe</div>
+        </div>
+        <div class="file-icon" data-url="https://twitch.tv/n333mo_">
+          <div class="file-icon-image">🔴</div>
+          <div class="file-icon-text">twitch.exe</div>
+        </div>
+        <div class="file-icon" data-url="https://github.com/n333mo">
+          <div class="file-icon-image">🤖</div>
+          <div class="file-icon-text">Github.exe</div>
+        </div>
+        <div class="file-icon" data-url="https://steamcommunity.com/id/n333mo/">
+          <div class="file-icon-image">🎮</div>
+          <div class="file-icon-text">steam.exe</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Music Player Window -->
+    <div class="window music-player" id="musicPlayer">
+      <div class="window-header music-player-header">
+        <div class="window-title music-player-title">Music Player</div>
+        <div class="window-controls">
+          <button class="window-button minimize">-</button>
+          <button class="window-button maximize">□</button>
+          <button class="window-button close">×</button>
+        </div>
+      </div>
+      <div class="music-player-content">
+        <div class="song-list" id="songList">
+          <!-- Songs will be populated here -->
+        </div>
+        
+        <div class="player-footer">
+          <div class="now-playing" id="nowPlayingContainer">
+            <img id="nowPlayingThumbnail" src="photos/default-music.jpg" class="now-playing-thumbnail" alt="Now Playing">
+            <div class="now-playing-info">
+              <div class="now-playing-title" id="nowPlayingTitle">No song selected</div>
+              <div class="now-playing-artist" id="nowPlayingArtist"></div>
+            </div>
+          </div>
+          
+          <div class="progress-time">
+            <span id="currentTime">0:00</span>
+            <span id="totalTime">0:00</span>
+          </div>
+          
+          <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          
+          <div class="player-controls">
+            <button class="control-button" id="shuffleButton">🔀</button>
+            <button class="control-button" id="prevButton">⏮</button>
+            <button class="control-button play-button" id="playButton">▶</button>
+            <button class="control-button" id="nextButton">⏭</button>
+            <button class="control-button" id="repeatButton">🔁</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Image Viewer -->
+    <div class="image-viewer" id="imageViewer">
+      <button class="close-image" id="closeImage">&times;</button>
+      <div class="image-container">
+        <img id="viewerImage" src="/placeholder.svg" alt="Image Preview">
+      </div>
+      <div class="image-title" id="imageTitle"></div>
+    </div>
+    
+    <!-- Text Editor -->
+    <div class="text-editor" id="textEditor">
+      <div class="text-editor-header">
+        <div class="text-editor-title" id="textEditorTitle">Edit Text</div>
+        <button class="close-button" id="closeTextEditor">&times;</button>
+      </div>
+      <div class="text-editor-content">
+        <textarea id="textContent"></textarea>
+        <div class="text-editor-buttons">
+          <button class="text-editor-button save-button" id="saveTextButton">Save</button>
+          <button class="text-editor-button" id="cancelTextButton">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Taskbar -->
+    <div class="taskbar">
+      <div class="start-button">Start</div>
+      <div class="now-playing-text" id="nowPlayingText">Playing: None</div>
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1tdXNpYyI+PHBhdGggZD0iTTkgMThWNWwxMi0ydjEzIj48L3BhdGg+PGNpcmNsZSBjeD0iNiIgY3k9IjE4IiByPSIzIj48L2NpcmNsZT48Y2lyY2xlIGN4PSIxOCIgY3k9IjE2IiByPSIzIj48L2NpcmNsZT48L3N2Zz4=" alt="Music Player" class="taskbar-icon" id="musicPlayerIcon">
+    </div>
+  </div>
+  
+  <audio id="audioPlayer"></audio>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginButton = document.getElementById('loginButton');
+      const passwordInput = document.getElementById('password');
+      const loginContainer = document.getElementById('loginContainer');
+      const welcomeScreen = document.getElementById('welcomeScreen');
+      const welcomeText = document.getElementById('welcomeText');
+      const desktop = document.getElementById('desktop');
+      const nowPlayingText = document.getElementById('nowPlayingText');
+      const settingsIcon = document.getElementById('settingsIcon');
+      const settingsWindow = document.getElementById('settingsWindow');
+      const volumeSlider = document.getElementById('volumeSlider');
+      const volumeValue = document.getElementById('volumeValue');
+      const bootAnimation = document.getElementById('bootAnimation');
+      const bootStatus = document.getElementById('bootStatus');
+      const terminalText = document.getElementById('terminalText');
+      
+      // Image Viewer Elements
+      const imageViewer = document.getElementById('imageViewer');
+      const viewerImage = document.getElementById('viewerImage');
+      const imageTitle = document.getElementById('imageTitle');
+      const closeImage = document.getElementById('closeImage');
+      
+      // Video Viewer Elements
+      const videoViewer = document.getElementById('videoViewer');
+      const playerVideo = document.getElementById('playerVideo');
+      const videoTitle = document.getElementById('videoTitle');
+      const closeVideo = document.getElementById('closeVideo');
+      
+      // Text Editor Elements
+      const textEditor = document.getElementById('textEditor');
+      const textContent = document.getElementById('textContent');
+      const textEditorTitle = document.getElementById('textEditorTitle');
+      const closeTextEditor = document.getElementById('closeTextEditor');
+      const saveTextButton = document.getElementById('saveTextButton');
+      const cancelTextButton = document.getElementById('cancelTextButton');
+      
+      // Boot animation sequence with character-by-character typing
+      function runBootSequence() {
+        const statusMessages = [
+          "Initializing system...",
+          "Loading core modules...",
+          "Checking system integrity...",
+          "Establishing secure connection...",
+          "Loading user interface...",
+          "System ready"
+        ];
+        
+        let currentStatus = 0;
+        
+        // Function to update boot status messages
+        function updateBootStatus() {
+          const statusInterval = setInterval(() => {
+            if (currentStatus < statusMessages.length) {
+              bootStatus.textContent = statusMessages[currentStatus];
+              currentStatus++;
+            } else {
+              clearInterval(statusInterval);
+              
+              // Fade out boot animation and show desktop
+              setTimeout(() => {
+                bootAnimation.style.opacity = '0';
+                bootAnimation.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                  bootAnimation.style.display = 'none';
+                  
+                  // Show desktop immediately
+                  desktop.style.display = 'block';
+                  desktop.style.backgroundImage = `url('photos/Default-Batman.jpg')`;
+                  
+                  // Start the welcome text typing animation
+                  const message = 'Hello N333MO';
+                  let i = 0;
+                  
+                  function typeWriter() {
+                    if (i < message.length) {
+                      welcomeText.textContent += message.charAt(i);
+                      audio.currentTime = 0;
+                      audio.play();
+                      i++;
+                      setTimeout(typeWriter, 100);
+                    } else {
+                      // Fade out welcome overlay after typing is complete
+                      setTimeout(() => {
+                        const welcomeOverlay = document.getElementById('welcomeOverlay');
+                        welcomeOverlay.style.opacity = '0';
+                        
+                        // Hide completely after fade out and start music
+                        setTimeout(() => {
+                          welcomeOverlay.style.display = 'none';
+                          playRandomSong();
+                        }, 500);
+                      }, 500);
+                    }
+                  }
+                  
+                  typeWriter();
+                }, 300);
+              }, 500);
+            }
+          }, 250);
+        }
+        
+        updateBootStatus();
+      }
+      
+      // File content storage
+      const fileContents = {
+        'secret_plans.txt': 'Top Secret Batman Plans:\n\n1. Upgrade Batmobile with new stealth technology\n2. Develop antidote for Joker\'s latest toxin\n3. Install additional security measures in the Batcave\n4. Schedule meeting with Commissioner Gordon\n5. Investigate suspicious activity at Gotham Harbor',
+        'Plans To Kill Lydell.doc': 'Operation Takedown:\n\n- Monitor Lydell\'s daily routine\n- Identify vulnerabilities in security detail\n- Prepare non-lethal neutralization methods\n-Coordinate with Gordon for proper arrest procedures\n- Ensure all evidence is properly documented for prosecution',
+        "Credits.txt": 'Made by: @80dropz \n \n \n '
+      };
+      
+      // Settings functionality
+      settingsIcon.addEventListener('click', () => {
+        settingsWindow.style.display = 'block';
+        // Center the window properly
+        const windowWidth = settingsWindow.offsetWidth;
+        const windowHeight = settingsWindow.offsetHeight;
+        const desktopWidth = desktop.offsetWidth;
+        const desktopHeight = desktop.offsetHeight;
+        
+        settingsWindow.style.left = `${(desktopWidth - windowWidth) / 2}px`;
+        settingsWindow.style.top = `${(desktopHeight - windowHeight) / 2}px`;
+        settingsWindow.style.zIndex = ++highestZIndex;
+      });
+
+      // Volume control
+      volumeSlider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        volumeValue.textContent = `${value}%`;
+        const audioPlayer = document.getElementById('audioPlayer');
+        if (audioPlayer) {
+          audioPlayer.volume = value / 100;
+        }
+        
+        // Update volume icon based on value
+        const volumeIcon = document.querySelector('.volume-icon');
+        if (value == 0) {
+          volumeIcon.textContent = '🔇';
+        } else if (value < 50) {
+          volumeIcon.textContent = '🔈';
+        } else {
+          volumeIcon.textContent = '🔊';
+        }
+      });
+
+      // Background selection
+      document.querySelectorAll('.background-option').forEach(option => {
+        option.addEventListener('click', () => {
+          const bgUrl = option.dataset.bg;
+          document.querySelector('.desktop').style.backgroundImage = `url(${bgUrl})`;
+          
+          // Update active state
+          document.querySelectorAll('.background-option').forEach(opt => {
+            opt.classList.remove('active');
+          });
+          option.classList.add('active');
+        });
+      });
+      
+      // Image Viewer functionality
+      closeImage.addEventListener('click', () => {
+        imageViewer.style.display = 'none';
+      });
+      
+      // Video Viewer functionality
+      closeVideo.addEventListener('click', () => {
+        videoViewer.style.display = 'none';
+        playerVideo.pause();
+        
+        // Resume music playback when video is closed
+        if (audioPlayer.src && isPlaying) {
+          audioPlayer.play();
+        }
+      });
+      
+      // Text Editor functionality
+      let currentEditingFile = '';
+      
+      closeTextEditor.addEventListener('click', () => {
+        textEditor.style.display = 'none';
+      });
+      
+      saveTextButton.addEventListener('click', () => {
+        if (currentEditingFile) {
+          fileContents[currentEditingFile] = textContent.value;
+          textEditor.style.display = 'none';
+        }
+      });
+      
+      cancelTextButton.addEventListener('click', () => {
+        textEditor.style.display = 'none';
+      });
+      
+      // Music Player Elements
+      const musicPlayerIcon = document.getElementById('musicPlayerIcon');
+      const musicPlayer = document.getElementById('musicPlayer');
+      const songList = document.getElementById('songList');
+      const playButton = document.getElementById('playButton');
+      const prevButton = document.getElementById('prevButton');
+      const nextButton = document.getElementById('nextButton');
+      const nowPlaying = document.getElementById('nowPlaying');
+      const progressBar = document.getElementById('progressBar');
+      const progressContainer = document.getElementById('progressContainer');
+      const audioPlayer = document.getElementById('audioPlayer');
+      const currentTimeDisplay = document.getElementById('currentTime');
+      const durationTimeDisplay = document.getElementById('durationTime');
+      
+      // Window Management
+      const windows = {
+        documents: document.getElementById('documentsWindow'),
+        pictures: document.getElementById('picturesWindow'),
+        apps: document.getElementById('appsWindow'),
+        settings: document.getElementById('settingsWindow'),
+        music: document.getElementById('musicPlayer')
+      };
+      
+      let activeWindow = null;
+      let highestZIndex = 100;
+      
+      // Make windows draggable
+      function makeWindowDraggable(window) {
+        const header = window.querySelector('.window-header') || window.querySelector('.settings-header') || window.querySelector('.music-player-header');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        
+        header.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          initialX = e.clientX - window.offsetLeft;
+          initialY = e.clientY - window.offsetTop;
+          
+          window.style.zIndex = ++highestZIndex;
+          activeWindow = window;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          
+          e.preventDefault();
+          currentX = e.clientX - initialX;
+          currentY = e.clientY - initialY;
+          
+          currentX = Math.max(0, Math.min(currentX, window.parentElement.clientWidth - window.offsetWidth));
+          currentY = Math.max(0, Math.min(currentY, window.parentElement.clientHeight - window.offsetHeight - 40));
+          
+          window.style.left = currentX + 'px';
+          window.style.top = currentY + 'px';
+        });
+        
+        document.addEventListener('mouseup', () => {
+          isDragging = false;
+        });
+        
+        // Window controls
+        const closeBtn = window.querySelector('.close');
+        const minimizeBtn = window.querySelector('.minimize');
+        const maximizeBtn = window.querySelector('.maximize');
+        
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            window.style.display = 'none';
+          });
+        }
+        
+        if (minimizeBtn) {
+          minimizeBtn.addEventListener('click', () => {
+            window.style.display = 'none';
+          });
+        }
+        
+        if (maximizeBtn) {
+          maximizeBtn.addEventListener('click', () => {
+            if (window.style.width === '100%') {
+              window.style.width = '';
+              window.style.height = '';
+              window.style.top = '';
+              window.style.left = '';
+            } else {
+              window.style.width = '100%';
+              window.style.height = 'calc(100% - 40px)';
+              window.style.top = '0';
+              window.style.left = '0';
+            }
+          });
+        }
+      }
+      
+      // Initialize draggable windows
+      Object.values(windows).forEach(makeWindowDraggable);
+      
+      // Handle folder clicks
+      document.querySelectorAll('.icon[data-folder]').forEach(icon => {
+        icon.addEventListener('click', () => {
+          const folderName = icon.getAttribute('data-folder');
+          const window = windows[folderName];
+          
+          if (window) {
+            window.style.display = 'block';
+            window.style.zIndex = ++highestZIndex;
+            
+            if (!window.style.left) {
+              window.style.left = '50px';
+              window.style.top = '50px';
+            }
+          }
+        });
+      });
+      
+      // Handle file clicks
+      document.querySelectorAll('.file-icon').forEach(icon => {
+        icon.addEventListener('click', () => {
+          let fileName = icon.getAttribute('data-file');
+          let fileType = icon.getAttribute('data-type');
+          let url = icon.getAttribute('data-url');
+          
+          if (url) {
+            window.open(url, '_blank');
+            return;
+          }
+          
+          if (fileType === 'image') {
+            let imageMap = {
+              'tripout.gif': 'photos/n333mo-tripout.gif',
+              'family_photo.jpg': 'photos/randal.jpg',
+              'batmobile.png': 'photos/fynshi.jpg',
+              'zebra.png': 'photos/zebra.png',
+              'N333MO.png': 'photos/N333MO.jpg',
+              'LOSSAVE.png': 'photos/LOSSAVEUS.jpg',
+              'Blat.png': 'photos/Blattt.png',
+              'Dawg.png': 'photos/Dawg.jpg',
+              'OneOfDem.png': 'photos/JustOneOfDem.jpg',
+              'DownyTwo.png': 'photos/Downy.jpg',
+              'BadBihBeat.png': 'photos/BadBihBeat.jpg'
+            };
+
+            viewerImage.src = imageMap[fileName] || '/placeholder.svg';
+            imageTitle.textContent = fileName;
+            imageViewer.style.display = 'flex';
+
+          } else if (fileType === 'video') {
+            playerVideo.src = `photos/${fileName}`;
+            videoTitle.textContent = fileName;
+            
+            if (audioPlayer && !audioPlayer.paused) {
+              audioPlayer.pause();
+            }
+            
+            videoViewer.style.display = 'flex';
+            videoViewer.style.zIndex = 9999;
+            
+            setTimeout(() => {
+              playerVideo.play()
+                .catch(err => console.error('Video play error:', err));
+            }, 50);
+
+          } else if (fileType === 'text') {
+            textEditorTitle.textContent = `Edit: ${fileName}`;
+            textContent.value = fileContents[fileName] || '';
+            textEditor.style.display = 'block';
+            currentEditingFile = fileName;
+          }
+        });
+      });
+      
+      // Add click handlers for application icons
+      document.querySelectorAll('.file-icon[data-url]').forEach(icon => {
+        icon.addEventListener('click', () => {
+          const url = icon.getAttribute('data-url');
+          if (url) {
+            window.open(url, '_blank');
+          }
+        });
+        
+        icon.style.transition = 'transform 0.2s ease';
+        icon.addEventListener('mouseenter', () => {
+          icon.style.transform = 'scale(1.05)';
+        });
+        icon.addEventListener('mouseleave', () => {
+          icon.style.transform = 'scale(1)';
+        });
+      });
+      
+      let audio = new Audio("sounds/keystroke.wav");
+      
+      // Login functionality
+      loginButton.addEventListener('click', function() {
+        if (passwordInput.value === '3334L') {
+          loginContainer.style.display = 'none';
+          bootAnimation.style.display = 'flex';
+          runBootSequence();
+        } else {
+          alert('Incorrect password!');
+        }
+      });
+      
+      // Music Player functionality
+      const songs = [
+        { 
+          title: "On Melancholy Hill", 
+          artist: "Gorillaz", 
+          file: "songs/song1.mp3",
+          thumbnail: "Thumbnails/Melachony.png"
+        },
+        { 
+          title: "Ballhog Anthem", 
+          artist: "Protect", 
+          file: "songs/song3.mp3",
+          thumbnail: "Thumbnails/ballhog.png"
+        },
+        { 
+          title: "Ice Vein", 
+          artist: "Destroy Lonely", 
+          file: "songs/song4.mp3",
+          thumbnail: "Thumbnails/Icevien.jpg"
+        },
+        { 
+          title: "13 nuyork nights at 21", 
+          artist: "Uzi Vert", 
+          file: "songs/song2.mp3",
+          thumbnail: "Thumbnails/nuyrok.jpg"
+        },
+        {
+          title: "Just How It Is",
+          artist: "Young Thug",
+          file: "songs/song5.mp3",
+          thumbnail: "Thumbnails/JHII.png"
+        },
+        {
+          title: "Hat Trick",
+          artist: "Protect",
+          file: "songs/song6.mp3",
+          thumbnail: "Thumbnails/HT.png"
+        },
+        {
+          title: "OPM BABI",
+          artist: "Playboi Carti",
+          file: "songs/song7.mp3",
+          thumbnail: "Thumbnails/OB.png"
+        },
+        {
+          title: "If It Aint Wok",
+          artist: "Lucki",
+          file: "songs/song8.mp3",
+          thumbnail: "Thumbnails/IFAW.jpg"
+        }
+      ];
+
+      let currentSongIndex = 0;
+      let isPlaying = false;
+      let musicVolume = 0.5;
+      let isShuffleOn = false;
+      let isRepeatOn = false;
+
+      function populateSongList() {
+        songList.innerHTML = '';
+        songs.forEach((song, index) => {
+          const songItem = document.createElement('div');
+          songItem.classList.add('song-item');
+          if (index === currentSongIndex) {
+            songItem.classList.add('active');
+          }
+
+          songItem.innerHTML = `
+            <img src="${song.thumbnail || 'photos/default-music.jpg'}" class="song-thumbnail" alt="${song.title}">
+            <div class="song-info">
+              <div class="song-title">${song.title}</div>
+              <div class="song-artist">${song.artist}</div>
+            </div>
+          `;
+
+          songItem.addEventListener('click', () => {
+            currentSongIndex = index;
+            loadAndPlaySong();
+          });
+          songList.appendChild(songItem);
+        });
+      }
+
+      function loadAndPlaySong() {
+        const song = songs[currentSongIndex];
+        audioPlayer.src = song.file;
+        audioPlayer.load();
+        playSong();
+        updateActiveSong();
+
+        nowPlayingTitle.textContent = song.title;
+        nowPlayingArtist.textContent = song.artist;
+        nowPlayingThumbnail.src = song.thumbnail || 'photos/default-music.jpg';
+        nowPlayingText.textContent = `Playing: ${song.title}`;
+      }
+
+      function playSong() {
+        audioPlayer.play();
+        isPlaying = true;
+        playButton.textContent = '⏸';
+      }
+
+      function pauseSong() {
+        audioPlayer.pause();
+        isPlaying = false;
+        playButton.textContent = '▶';
+      }
+
+      function updateActiveSong() {
+        const songItems = document.querySelectorAll('.song-item');
+        songItems.forEach((item, index) => {
+          if (index === currentSongIndex) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+
+      function playNextSong() {
+        if (isShuffleOn) {
+          let newIndex;
+          do {
+            newIndex = Math.floor(Math.random() * songs.length);
+          } while (newIndex === currentSongIndex && songs.length > 1);
+          currentSongIndex = newIndex;
+        } else {
+          currentSongIndex = (currentSongIndex + 1) % songs.length;
+        }
+        loadAndPlaySong();
+      }
+
+      function playPrevSong() {
+        if (audioPlayer.currentTime > 3) {
+          audioPlayer.currentTime = 0;
+        } else {
+          currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+          loadAndPlaySong();
+        }
+      }
+
+      function updateProgress() {
+        const { currentTime, duration } = audioPlayer;
+        if (isNaN(duration)) return;
+
+        const progressPercent = (currentTime / duration) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+
+        currentTimeEl.textContent = formatTime(currentTime);
+        totalTimeEl.textContent = formatTime(duration);
+      }
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+      }
+
+      function setProgress(e) {
+        const width = this.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audioPlayer.duration;
+        audioPlayer.currentTime = (clickX / width) * duration;
+      }
+
+      function playRandomSong() {
+        currentSongIndex = Math.floor(Math.random() * songs.length);
+        loadAndPlaySong();
+      }
+
+      // Shuffle and repeat functionality
+      shuffleButton.addEventListener('click', () => {
+        isShuffleOn = !isShuffleOn;
+        shuffleButton.style.color = isShuffleOn ? '#1DB954' : '#b3b3b3';
+      });
+
+      repeatButton.addEventListener('click', () => {
+        isRepeatOn = !isRepeatOn;
+        repeatButton.style.color = isRepeatOn ? '#1DB954' : '#b3b3b3';
+        audioPlayer.loop = isRepeatOn;
+      });
+
+      // Video player event listeners
+      playerVideo.addEventListener('play', () => {
+        musicVolume = audioPlayer.volume;
+        audioPlayer.volume = 0;
+      });
+
+      playerVideo.addEventListener('ended', () => {
+        audioPlayer.volume = musicVolume;
+        if (isPlaying) {
+          audioPlayer.play();
+        }
+        videoViewer.style.display = 'none';
+      });
+
+      musicPlayerIcon.addEventListener('click', () => {
+        musicPlayer.style.display = 'block';
+        musicPlayer.style.zIndex = ++highestZIndex;
+
+        if (!musicPlayer.style.left) {
+          const desktopWidth = desktop.offsetWidth;
+          const desktopHeight = desktop.offsetHeight;
+          musicPlayer.style.left = `${(desktopWidth - 600) / 2}px`;
+          musicPlayer.style.top = `${(desktopHeight - 500) / 2}px`;
+        }
+
+        populateSongList();
+      });
+
+      playButton.addEventListener('click', () => {
+        if (isPlaying) {
+          pauseSong();
+        } else {
+          if (audioPlayer.src) {
+            playSong();
+          } else if (songs.length > 0) {
+            loadAndPlaySong();
+          }
+        }
+      });
+
+      prevButton.addEventListener('click', playPrevSong);
+      nextButton.addEventListener('click', playNextSong);
+
+      audioPlayer.addEventListener('timeupdate', updateProgress);
+      progressContainer.addEventListener('click', setProgress);
+
+      audioPlayer.addEventListener('ended', () => {
+        if (isRepeatOn) {
+          return;
+        }
+
+        if (isShuffleOn || currentSongIndex < songs.length - 1) {
+          playNextSong();
+        } else {
+          pauseSong();
+          audioPlayer.currentTime = 0;
+          updateProgress();
+        }
+      });
+
+      populateSongList();
+    });
+  </script>
+</body>
+</html>
