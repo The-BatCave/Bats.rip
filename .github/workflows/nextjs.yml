@@ -22,10 +22,8 @@ jobs:
         with:
           node-version: "20"
       
-      - name: Install dependencies with npm 7
-        run: |
-          npm install -g npm@7
-          npm install --no-package-lock
+      - name: Install dependencies with force
+        run: npm install --force
       
       - name: Build with Next.js
         run: npm run build
