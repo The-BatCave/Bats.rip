@@ -25,6 +25,14 @@ jobs:
       - name: Install dependencies with force
         run: npm install --force
       
+      - name: Temporarily rename API directory
+        run: |
+          # Create a backup of the API directory
+          mkdir -p .api-backup
+          cp -r app/api/* .api-backup/
+          # Remove the API directory to prevent build errors
+          rm -rf app/api
+      
       - name: Update next.config.mjs for static export
         run: |
           cat > next.config.mjs << 'EOL'
@@ -34,7 +42,6 @@ jobs:
             images: {
               unoptimized: true,
             },
-            // Disable type checking and linting during build
             typescript: {
               ignoreBuildErrors: true,
             },
@@ -70,3 +77,9 @@ jobs:
           folder: out
           branch: gh-pages
           clean: true
+      
+      - name: Restore API directory
+        run: |
+          # Restore the API directory after build
+          mkdir -p app/api
+          cp -r .api-backup/* app/api/
