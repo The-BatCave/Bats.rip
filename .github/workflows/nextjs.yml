@@ -22,11 +22,14 @@ jobs:
         with:
           node-version: "20"
       
-      - name: Install dependencies with force
-        run: npm install --force
+      - name: Install Yarn
+        run: npm install -g yarn
+      
+      - name: Install dependencies with Yarn
+        run: yarn install
       
       - name: Build with Next.js
-        run: npm run build
+        run: yarn build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
