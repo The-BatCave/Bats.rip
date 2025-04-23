@@ -1,43 +1,19 @@
 "use client"
 
-import { useState } from "react"
-import BootAnimation from "@/components/boot-animation"
-import LoginScreen from "@/components/login-screen"
-import Desktop from "@/components/desktop"
-import { UserProvider } from "@/context/user-context"
-import { AudioProvider } from "@/context/audio-context"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export default function Home() {
-  const [currentScreen, setCurrentScreen] = useState<"login" | "boot" | "desktop">("login")
+export default function HomePage() {
+  const router = useRouter()
 
-  const handleLogin = (password: string) => {
-    if (password === "Batcave") {
-      setCurrentScreen("boot")
-
-      // After boot animation completes, show desktop
-      setTimeout(() => {
-        setCurrentScreen("desktop")
-      }, 3000)
-    } else {
-      alert("Incorrect password!")
-    }
-  }
-
-  const handleLogout = () => {
-    setCurrentScreen("login")
-  }
+  useEffect(() => {
+    // Redirect directly to desktop page
+    router.push("/desktop")
+  }, [router])
 
   return (
-    <UserProvider>
-      <AudioProvider>
-        <main className="h-screen w-screen overflow-hidden">
-          {currentScreen === "login" && <LoginScreen onLogin={handleLogin} />}
-
-          {currentScreen === "boot" && <BootAnimation />}
-
-          {currentScreen === "desktop" && <Desktop onLogout={handleLogout} />}
-        </main>
-      </AudioProvider>
-    </UserProvider>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
   )
 }
