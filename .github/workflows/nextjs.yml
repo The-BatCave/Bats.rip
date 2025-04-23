@@ -17,10 +17,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: 'npm'
+          # Remove the cache option since there's no lock file
+          # cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # This will generate a package-lock.json file
+        run: npm install
 
       - name: Create .env.local file
         run: |
@@ -29,6 +31,10 @@ jobs:
 
       - name: Build Next.js application
         run: npm run build
+
+      # Create .nojekyll file to prevent GitHub Pages from ignoring files that begin with an underscore
+      - name: Add .nojekyll file
+        run: touch ./out/.nojekyll
 
       # Deploy directly to GitHub Pages branch
       - name: Deploy to GitHub Pages
