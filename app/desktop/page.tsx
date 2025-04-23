@@ -23,6 +23,8 @@ import {
   Sun,
   Music,
 } from "lucide-react"
+import { fetchUserFiles } from "@/lib/client-storage"
+import type { UserFiles } from "@/lib/client-storage"
 
 // Default profile picture URL
 const DEFAULT_PROFILE_PIC = "https://th.bing.com/th/id/OIP.t8GsH1Q3v-NLfvTKIHIc3QHaHa?w=199&h=199&c=7&r=0&o=5&pid=1.7"
@@ -199,16 +201,6 @@ const initialProfiles = [
   },
 ]
 
-// Type for user files
-type UserFiles = {
-  [bucket: string]: {
-    name: string
-    publicUrl: string
-    path: string
-    bucket: string
-  }[]
-}
-
 export default function DesktopPage() {
   const [profiles, setProfiles] = useState(initialProfiles)
   const [selectedProfile, setSelectedProfile] = useState(initialProfiles[0])
@@ -266,27 +258,16 @@ export default function DesktopPage() {
 
       for (const profile of profiles) {
         try {
-          const response = await fetch("/api/user-files", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userId: profile.id }),
-          })
+          // Use client-side function instead of API call
+          const result = await fetchUserFiles(profile.id)
 
-          if (!response.ok) {
-            throw new Error(`Error fetching files: ${response.statusText}`)
-          }
-
-          const data = await response.json()
-
-          if (data.success && data.files) {
-            newUserFiles[profile.id] = data.files
+          if (result.success && result.files) {
+            newUserFiles[profile.id] = result.files
 
             // Extract profile picture
-            if (data.files["profile-picture"] && data.files["profile-picture"].length > 0) {
+            if (result.files["profile-picture"] && result.files["profile-picture"].length > 0) {
               // Find a file that starts with "pic."
-              const picFile = data.files["profile-picture"].find((file: any) => file.name.startsWith("pic."))
+              const picFile = result.files["profile-picture"].find((file: any) => file.name.startsWith("pic."))
 
               if (picFile) {
                 newProfileImages[profile.id] = picFile.publicUrl
@@ -294,9 +275,9 @@ export default function DesktopPage() {
             }
 
             // Extract background image
-            if (data.files["backgrounds"] && data.files["backgrounds"].length > 0) {
+            if (result.files["backgrounds"] && result.files["backgrounds"].length > 0) {
               // Find a file that starts with "bg."
-              const bgFile = data.files["backgrounds"].find((file: any) => file.name.startsWith("bg."))
+              const bgFile = result.files["backgrounds"].find((file: any) => file.name.startsWith("bg."))
 
               if (bgFile) {
                 newBackgroundImages[profile.id] = bgFile.publicUrl
@@ -304,9 +285,9 @@ export default function DesktopPage() {
             }
 
             // Extract song file
-            if (data.files["songs"] && data.files["songs"].length > 0) {
+            if (result.files["songs"] && result.files["songs"].length > 0) {
               // Find any song file (they should start with "song.")
-              const songFile = data.files["songs"].find((file: any) => file.name.startsWith("song"))
+              const songFile = result.files["songs"].find((file: any) => file.name.startsWith("song"))
 
               if (songFile) {
                 newProfileSongs[profile.id] = songFile.publicUrl
@@ -346,16 +327,16 @@ export default function DesktopPage() {
       setProfileSongs(newProfileSongs)
 
       // Auto-play song for the initially selected profile
-      if (selectedProfile && profileSongs[selectedProfile.id]) {
+      if (selectedProfile && newProfileSongs[selectedProfile.id]) {
         if (!audioRef.current) {
-          const audio = new Audio(profileSongs[selectedProfile.id])
+          const audio = new Audio(newProfileSongs[selectedProfile.id])
           audio.volume = 0.2
           audioRef.current = audio
 
           // Get the song name
-          if (userFiles[selectedProfile.id] && userFiles[selectedProfile.id]["songs"]) {
-            const songFile = userFiles[selectedProfile.id]["songs"].find(
-              (file) => file.publicUrl === profileSongs[selectedProfile.id],
+          if (newUserFiles[selectedProfile.id] && newUserFiles[selectedProfile.id]["songs"]) {
+            const songFile = newUserFiles[selectedProfile.id]["songs"].find(
+              (file) => file.publicUrl === newProfileSongs[selectedProfile.id],
             )
             if (songFile) {
               setCurrentSongName(songFile.name.replace(/^song-/, "").replace(/\.[^/.]+$/, ""))

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { getSupabaseBrowser } from "@/lib/supabase"
 import type { Profile } from "@/types/database"
+import { fetchUserFiles, uploadFile } from "@/lib/client-storage"
+import type { UserFiles } from "@/lib/client-storage"
 import {
   LogOut,
   AlertTriangle,
@@ -30,16 +32,6 @@ const VIDEO_EXTENSIONS = ["mp4", "mov", "avi", "wmv", "flv", "mkv", "webm", "m4v
 
 // List of allowed audio extensions
 const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a", "flac", "aac"]
-
-// Type for user files
-type UserFiles = {
-  [bucket: string]: {
-    name: string
-    publicUrl: string
-    path: string
-    bucket: string
-  }[]
-}
 
 export default function AdminDashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -97,7 +89,7 @@ export default function AdminDashboardPage() {
           setSteamUrl(userProfile.steam_url || "")
 
           // Fetch user files from API
-          await fetchUserFiles(user.id)
+          await fetchUserFilesData(user.id)
         } else {
           // Create a default profile if none exists
           const defaultProfile = {
@@ -173,53 +165,36 @@ export default function AdminDashboardPage() {
     }
   }, [profile])
 
-  // Function to fetch user files from API
-  const fetchUserFiles = async (userId: string) => {
+  // Replace fetchUserFiles with:
+  const fetchUserFilesData = async (userId: string) => {
     try {
       setRefreshingImages(true)
 
-      const response = await fetch("/api/user-files", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      })
+      // Use client-side function instead of API call
+      const result = await fetchUserFiles(userId)
 
-      if (!response.ok) {
-        throw new Error(`Error fetching files: ${response.statusText}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success && data.files) {
-        setUserFiles(data.files)
+      if (result.success && result.files) {
+        setUserFiles(result.files)
 
         // Extract profile picture
-        if (data.files["profile-picture"] && data.files["profile-picture"].length > 0) {
-          // Find a file that starts with "pic."
-          const picFile = data.files["profile-picture"].find((file: any) => file.name.startsWith("pic."))
-
+        if (result.files["profile-picture"] && result.files["profile-picture"].length > 0) {
+          const picFile = result.files["profile-picture"].find((file) => file.name.startsWith("pic."))
           if (picFile) {
             setProfileImageUrl(picFile.publicUrl)
           }
         }
 
         // Extract background image
-        if (data.files["backgrounds"] && data.files["backgrounds"].length > 0) {
-          // Find a file that starts with "bg."
-          const bgFile = data.files["backgrounds"].find((file: any) => file.name.startsWith("bg."))
-
+        if (result.files["backgrounds"] && result.files["backgrounds"].length > 0) {
+          const bgFile = result.files["backgrounds"].find((file) => file.name.startsWith("bg."))
           if (bgFile) {
             setBackgroundImageUrl(bgFile.publicUrl)
           }
         }
 
         // Extract song file
-        if (data.files["songs"] && data.files["songs"].length > 0) {
-          // Find a file that starts with "song-"
-          const songFile = data.files["songs"].find((file: any) => file.name.startsWith("song-"))
-
+        if (result.files["songs"] && result.files["songs"].length > 0) {
+          const songFile = result.files["songs"].find((file) => file.name.startsWith("song-"))
           if (songFile) {
             setSongUrl(songFile.publicUrl)
             setSongName(songFile.name.replace(/^song-/, ""))
@@ -263,6 +238,7 @@ export default function AdminDashboardPage() {
     }
   }
 
+  // Replace handleAvatarUpload with:
   const handleAvatarUpload = async (file: File) => {
     try {
       setUploadingAvatar(true)
@@ -277,33 +253,16 @@ export default function AdminDashboardPage() {
       // Simplified file name: pic.{extension}
       const fileName = `pic.${fileExt}`
 
-      // Create form data for upload
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("bucket", "profile-picture")
-      formData.append("userId", profile?.id || "")
-      formData.append("fileName", fileName)
+      // Use client-side function instead of API call
+      const result = await uploadFile(file, "profile-picture", profile?.id || "", fileName)
 
-      // Upload using the API route
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.details || "Upload failed")
+      if (!result.success) {
+        throw new Error(result.error || "Upload failed")
       }
 
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || "Upload failed")
-      }
-
-      // Refresh user files to get the new URLs
+      // Refresh user files
       if (profile) {
-        await fetchUserFiles(profile.id)
+        await fetchUserFilesData(profile.id)
       }
 
       setNotification({
@@ -338,6 +297,7 @@ export default function AdminDashboardPage() {
     }
   }
 
+  // Replace handleBackgroundUpload with:
   const handleBackgroundUpload = async (file: File) => {
     try {
       setUploadingBackground(true)
@@ -352,33 +312,16 @@ export default function AdminDashboardPage() {
       // Simplified file name: bg.{extension}
       const fileName = `bg.${fileExt}`
 
-      // Create form data for upload
-      const formData = new FormData()
-      formData.append("file", file)
-      formData.append("bucket", "backgrounds")
-      formData.append("userId", profile?.id || "")
-      formData.append("fileName", fileName)
+      // Use client-side function instead of API call
+      const result = await uploadFile(file, "backgrounds", profile?.id || "", fileName)
 
-      // Upload using the API route
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.details || "Upload failed")
+      if (!result.success) {
+        throw new Error(result.error || "Upload failed")
       }
 
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || "Upload failed")
-      }
-
-      // Refresh user files to get the new URLs
+      // Refresh user files
       if (profile) {
-        await fetchUserFiles(profile.id)
+        await fetchUserFilesData(profile.id)
       }
 
       setNotification({
@@ -455,7 +398,7 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // Function to refresh images from storage
+  // Replace refreshImages with:
   const refreshImages = async () => {
     try {
       setNotification({
@@ -464,7 +407,7 @@ export default function AdminDashboardPage() {
       })
 
       if (profile) {
-        await fetchUserFiles(profile.id)
+        await fetchUserFilesData(profile.id)
       }
 
       setNotification({
@@ -480,7 +423,7 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // Function to delete the current song
+  // Replace deleteSong with:
   const deleteSong = async () => {
     try {
       if (!profile?.id) return
@@ -489,6 +432,8 @@ export default function AdminDashboardPage() {
         type: "success",
         message: "Deleting song...",
       })
+
+      const supabase = getSupabaseBrowser()
 
       // List files in the songs bucket
       const { data: songFiles, error: listError } = await supabase.storage.from("songs").list(profile.id)
@@ -509,7 +454,7 @@ export default function AdminDashboardPage() {
         }
 
         // Refresh user files
-        await fetchUserFiles(profile.id)
+        await fetchUserFilesData(profile.id)
 
         setSongUrl(null)
         setSongName(null)
@@ -755,7 +700,7 @@ export default function AdminDashboardPage() {
                       message: "Song uploaded successfully",
                     })
                     if (profile) {
-                      fetchUserFiles(profile.id)
+                      fetchUserFilesData(profile.id)
                     }
                   }}
                   onError={(message) => {
