@@ -20,14 +20,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-
-      # Debug: Check configuration files
-      - name: Check configuration files
-        run: |
-          echo "Package.json content:"
-          cat package.json
-          echo "Next.js config content:"
-          cat next.config.mjs
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -37,68 +30,28 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
 
-      # Debug: Run build with verbose output
+      # Update next.config.mjs to ensure static export
+      - name: Update Next.js config
+        run: |
+          cat > next.config.mjs << 'EOL'
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            reactStrictMode: true,
+            images: {
+              unoptimized: true,
+            },
+            output: 'export',
+          };
+
+          export default nextConfig;
+          EOL
+
       - name: Build Next.js application
-        run: |
-          echo "Running npm run build"
-          npm run build
-          echo "Build completed"
-          
-          echo "Directory structure after build:"
-          find . -type d -maxdepth 2
-          
-          echo "Looking for build output:"
-          find . -type d -name "out" -o -name ".next" -o -name "dist" -o -name "build"
-          
-          echo ".next directory contents (if exists):"
-          ls -la .next || echo ".next directory not found"
+        run: npm run build
 
-      # Create a simple index.html if no build output is found
-      - name: Create fallback content
-        run: |
-          mkdir -p deploy-output
-          echo "<html><head><title>Bats.rip</title></head><body><h1>Bats.rip</h1><p>Site is being built...</p></body></html>" > deploy-output/index.html
-          touch deploy-output/.nojekyll
-
-      # Deploy using direct git commands with the fallback content or actual build output
+      # Deploy using GitHub Pages action
       - name: Deploy to GitHub Pages
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          
-          # Create and switch to a new orphan branch (no history)
-          git checkout --orphan gh-pages-temp
-          
-          # Remove all files from staging
-          git rm -rf .
-          
-          # Check if .next/standalone exists (for Next.js 12+ with output: 'standalone')
-          if [ -d ".next/standalone" ]; then
-            echo "Using .next/standalone as build output"
-            cp -r .next/standalone/* .
-            cp -r .next/static .next/standalone/.next/
-          # Check if .next exists (for Next.js with default output)
-          elif [ -d ".next" ]; then
-            echo "Using .next as build output"
-            cp -r .next/* .
-          # Check if out exists (for Next.js with output: 'export')
-          elif [ -d "out" ]; then
-            echo "Using out as build output"
-            cp -r out/* .
-          # Use fallback content if no build output is found
-          else
-            echo "No build output found, using fallback content"
-            cp -r deploy-output/* .
-          fi
-          
-          # Create .nojekyll file
-          touch .nojekyll
-          
-          # Stage all changes
-          git add .
-          
-          # Commit changes
-          git commit -m "Deploy to GitHub Pages"
-          
-          # Force push to gh-pages branch
-          git push -f origin gh-pages-temp:gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: out
+          clean: true
