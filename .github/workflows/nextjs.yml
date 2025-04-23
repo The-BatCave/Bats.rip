@@ -6,11 +6,8 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-# Set permissions explicitly
 permissions:
-  contents: write # This is crucial - it allows the action to write to your repository
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -35,18 +32,18 @@ jobs:
       - name: Build Next.js application
         run: npm run build
 
-      # Create out directory if it doesn't exist
-      - name: Create out directory if needed
-        run: mkdir -p out
-
-      # Create .nojekyll file
-      - name: Add .nojekyll file
+      - name: Create .nojekyll file
         run: touch out/.nojekyll
 
-      # Deploy directly to GitHub Pages branch
+      # Simple deployment using git commands directly
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: out # The folder the action should deploy
-          branch: gh-pages # The branch the action should deploy to
-          token: ${{ secrets.GITHUB_TOKEN }} # Use the built-in token
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git checkout --orphan gh-pages
+          git rm -rf .
+          cp -r out/* .
+          touch .nojekyll
+          git add .
+          git commit -m "Deploy to GitHub Pages"
+          git push -f origin gh-pages
