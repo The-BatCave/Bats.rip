@@ -21,6 +21,14 @@ jobs:
         with:
           node-version: "18"
 
+      # Debug: Check package.json and next.config.mjs
+      - name: Check configuration files
+        run: |
+          echo "Package.json content:"
+          cat package.json || echo "package.json not found"
+          echo "Next.js config content:"
+          cat next.config.mjs || echo "next.config.mjs not found"
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
@@ -29,21 +37,16 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
 
+      # Debug: Run build with verbose output
       - name: Build Next.js application
-        run: npm run build
+        run: npm run build -- --debug
 
-      - name: Create .nojekyll file
-        run: touch out/.nojekyll
-
-      # Simple deployment using git commands directly
-      - name: Deploy to GitHub Pages
+      # Debug: List all directories to find where the build output is
+      - name: List directories
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git checkout --orphan gh-pages
-          git rm -rf .
-          cp -r out/* .
-          touch .nojekyll
-          git add .
-          git commit -m "Deploy to GitHub Pages"
-          git push -f origin gh-pages
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          echo "Looking for potential build output directories:"
+          find . -type d -name "out" -o -name "build" -o -name "dist" -o -name ".next"
