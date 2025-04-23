@@ -17,12 +17,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          # Remove the cache option since there's no lock file
-          # cache: 'npm'
 
       - name: Install dependencies
-        # This will generate a package-lock.json file
-        run: npm install
+        # Use --legacy-peer-deps to bypass the peer dependency conflicts
+        run: npm install --legacy-peer-deps
 
       - name: Create .env.local file
         run: |
