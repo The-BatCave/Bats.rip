@@ -6,8 +6,9 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+# Set explicit permissions
 permissions:
-  contents: write
+  contents: write  # This is crucial for pushing to branches
 
 jobs:
   build-and-deploy:
@@ -15,19 +16,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false  # This is important for the deploy action
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-
-      # Debug: Check package.json and next.config.mjs
-      - name: Check configuration files
-        run: |
-          echo "Package.json content:"
-          cat package.json || echo "package.json not found"
-          echo "Next.js config content:"
-          cat next.config.mjs || echo "next.config.mjs not found"
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -37,16 +32,40 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
 
-      # Debug: Run build with verbose output
       - name: Build Next.js application
-        run: npm run build -- --debug
+        run: npm run build
 
-      # Debug: List all directories to find where the build output is
-      - name: List directories
+      # Create out directory if it doesn't exist
+      - name: Create out directory if needed
+        run: mkdir -p out
+
+      # Create .nojekyll file
+      - name: Add .nojekyll file
+        run: touch out/.nojekyll
+
+      # Deploy using direct git commands
+      - name: Deploy to GitHub Pages
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -la
-          echo "Looking for potential build output directories:"
-          find . -type d -name "out" -o -name "build" -o -name "dist" -o -name ".next"
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Create and switch to a new orphan branch (no history)
+          git checkout --orphan gh-pages-temp
+          
+          # Remove all files from staging
+          git rm -rf .
+          
+          # Copy the build output to the root
+          cp -r out/* .
+          
+          # Create .nojekyll file
+          touch .nojekyll
+          
+          # Stage all changes
+          git add .
+          
+          # Commit changes
+          git commit -m "Deploy to GitHub Pages"
+          
+          # Force push to gh-pages branch
+          git push -f origin gh-pages-temp:gh-pages
