@@ -27,12 +27,24 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
 
+      # Debug: Check next.config.mjs content
+      - name: Check Next.js config
+        run: cat next.config.mjs || echo "next.config.mjs not found"
+
       - name: Build Next.js application
         run: npm run build
 
-      # Create .nojekyll file to prevent GitHub Pages from ignoring files that begin with an underscore
+      # Debug: List directories to see where the build output is
+      - name: List directories
+        run: ls -la
+
+      # Create out directory if it doesn't exist
+      - name: Create out directory if needed
+        run: mkdir -p out
+
+      # Create .nojekyll file
       - name: Add .nojekyll file
-        run: touch ./out/.nojekyll
+        run: touch out/.nojekyll
 
       # Deploy directly to GitHub Pages branch
       - name: Deploy to GitHub Pages
