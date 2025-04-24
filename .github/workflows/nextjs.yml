@@ -79,11 +79,24 @@ jobs:
           NEXT_PUBLIC_SERVERLESS_API_URL: ${{ secrets.NEXT_PUBLIC_SERVERLESS_API_URL }}
         run: npm run build
       
-      # Deploy to the github-pages branch
-      - name: Deploy to github-pages branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: out # The folder the action should deploy
-          branch: github-pages # The branch the action should deploy to
-          clean: true # Automatically remove deleted files from the deploy branch
-          commit-message: "Deploy Next.js build to github-pages branch"
+      # Create a script to fix HTML files after build
+      - name: Create HTML fix script
+        run: |
+          echo "const fs = require('fs');" > fix-html.js
+          echo "const path = require('path');" >> fix-html.js
+          echo "const outDir = path.join(process.cwd(), 'out');" >> fix-html.js
+          echo "function fixHtmlFiles(dir) {" >> fix-html.js
+          echo "  const files = fs.readdirSync(dir);" >> fix-html.js
+          echo "  files.forEach(file => {" >> fix-html.js
+          echo "    const filePath = path.join(dir, file);" >> fix-html.js
+          echo "    if (fs.statSync(filePath).isDirectory()) {" >> fix-html.js
+          echo "      fixHtmlFiles(filePath);" >> fix-html.js
+          echo "    } else if (file.endsWith('.html')) {" >> fix-html.js
+          echo "      let content = fs.readFileSync(filePath, 'utf8');" >> fix-html.js
+          echo "      // Fix paths in HTML files" >> fix-html.js
+          echo "      content = content.replace(/\"\/_next\//g, '\"_next/');" >> fix-html.js
+          echo "      fs.writeFileSync(filePath, content);" >> fix-html.js
+          echo "      console.log('Fixed paths in', filePath);" >> fix-html.js
+          echo "    }" >> fix-html.js
+          echo "  });" >> fix-html.js
+         
