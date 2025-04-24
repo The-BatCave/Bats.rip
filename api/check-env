@@ -1,0 +1,1 @@
+{"status":"ok","environment":"production","variables":{"supabaseUrl":true,"supabaseAnonKey":true,"supabaseServiceKey":true,"postgresUrl":true},"timestamp":"2025-04-24T01:51:50.653Z"}
