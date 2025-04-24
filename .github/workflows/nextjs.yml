@@ -98,4 +98,5 @@ jobs:
         with:
           folder: out # The folder the action should deploy
           branch: github-pages # The branch the action should deploy to
-          clean: true # Automatically remove deleted file
+          clean: true # Automatically remove deleted files from the deploy branch
+          commit-message: "Deploy Next.js build to github-pages branch"
