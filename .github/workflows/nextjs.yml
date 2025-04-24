@@ -29,27 +29,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          # Remove the cache option since there's no lock file
       
-      # Generate a package-lock.json file
-      - name: Generate package-lock.json
-        run: npm install --package-lock-only
-      
-      # Now we can use the cache with the generated lock file
-      - name: Restore cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            .next/cache
-            node_modules
-          # Generate a new cache whenever packages change
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}
-          # If source files changed but packages didn't, rebuild from a prior cache
-          restore-keys: |
-            ${{ runner.os }}-nextjs-
+      # Skip generating package-lock.json since it's causing dependency conflicts
+      # Instead, let's just install dependencies with legacy-peer-deps flag
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
       
       - name: Build with Next.js
         env:
@@ -68,7 +53,7 @@ jobs:
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           # Serverless API URL
           NEXT_PUBLIC_SERVERLESS_API_URL: ${{ secrets.NEXT_PUBLIC_SERVERLESS_API_URL }}
-        run: npm run build
+        run: npm run build --legacy-peer-deps
       
       # Deploy to the github-pages branch
       - name: Deploy to github-pages branch
