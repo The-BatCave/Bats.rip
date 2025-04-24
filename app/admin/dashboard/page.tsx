@@ -396,6 +396,7 @@ export default function AdminDashboardPage() {
     }
   }
 
+  // Update the updateBio function to use our client-side API
   const updateBio = async () => {
     try {
       // First, update the bio in the profiles table
@@ -409,7 +410,7 @@ export default function AdminDashboardPage() {
         bio,
       })
 
-      // Now save the bio to the descriptions bucket as bio.txt using the API route
+      // Now save the bio to the descriptions bucket as bio.txt using the client API
       if (profile?.id) {
         try {
           setNotification({
@@ -417,29 +418,14 @@ export default function AdminDashboardPage() {
             message: "Bio saved to profile. Saving to storage...",
           })
 
-          // Use the API route to save the text file
-          const response = await fetch("/api/save-text", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              userId: profile.id,
-              text: bio,
-              fileName: "bio.txt",
-              bucket: "descriptions",
-            }),
-          })
+          // Import the client-side API function
+          const { saveTextToStorage } = await import("@/lib/api-client")
 
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || "Failed to save bio to storage")
-          }
+          // Use the client-side API function
+          const result = await saveTextToStorage(profile.id, bio, "bio.txt", "descriptions")
 
-          const data = await response.json()
-
-          if (!data.success) {
-            throw new Error(data.error || "Failed to save bio to storage")
+          if (!result.success) {
+            throw new Error(result.error || "Failed to save bio to storage")
           }
 
           setNotification({
