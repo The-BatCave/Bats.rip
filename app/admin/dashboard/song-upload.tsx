@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useRef } from "react"
 import { Music, Upload } from "lucide-react"
-import { getSupabaseBrowser } from "@/lib/supabase"
 
 interface SongUploadProps {
   userId: string
@@ -57,38 +56,29 @@ export default function SongUpload({ userId, onUploadComplete, onError }: SongUp
       // Keep the original name for display purposes
       const fileName = `song-${file.name}`
 
-      // Use direct Supabase client instead of API route
-      const supabase = getSupabaseBrowser()
+      // Create form data for upload
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("bucket", "songs")
+      formData.append("userId", userId)
+      formData.append("fileName", fileName)
 
-      // Delete existing song files
-      try {
-        const { data: existingFiles, error: listError } = await supabase.storage.from("songs").list(userId)
-
-        if (!listError && existingFiles && existingFiles.length > 0) {
-          const filesToDelete = existingFiles.map((file) => `${userId}/${file.name}`)
-
-          if (filesToDelete.length > 0) {
-            await supabase.storage.from("songs").remove(filesToDelete)
-          }
-        }
-      } catch (error) {
-        console.error("Error handling existing files:", error)
-      }
-
-      // Upload the new file
-      const filePath = `${userId}/${fileName}`
-      const { error: uploadError } = await supabase.storage.from("songs").upload(filePath, file, {
-        upsert: true,
-        cacheControl: "0",
+      // Upload using the API route
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
       })
 
-      if (uploadError) {
-        throw uploadError
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || "Upload failed")
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage.from("songs").getPublicUrl(filePath)
-      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || "Upload failed")
+      }
 
       // Notify parent component
       onUploadComplete()

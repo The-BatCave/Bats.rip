@@ -1,13 +1,14 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { getSupabaseBrowser } from "@/lib/supabase"
 import {
+  Folder,
+  User,
   Settings,
+  FolderOpen,
   Lock,
   Play,
   Pause,
@@ -18,13 +19,7 @@ import {
   RefreshCw,
   Volume2,
   VolumeX,
-  X,
-  Moon,
-  Sun,
-  Music,
 } from "lucide-react"
-import { fetchUserFiles } from "@/lib/client-storage"
-import type { UserFiles } from "@/lib/client-storage"
 
 // Default profile picture URL
 const DEFAULT_PROFILE_PIC = "https://th.bing.com/th/id/OIP.t8GsH1Q3v-NLfvTKIHIc3QHaHa?w=199&h=199&c=7&r=0&o=5&pid=1.7"
@@ -37,7 +32,7 @@ const initialProfiles = [
     display_name: "arkham",
     avatar_url: null,
     background_image: null,
-    description: " ",
+    description: "",
     twitter_url: "https://twitter.com/arkxham_",
     twitch_url: "https://bats.rip",
     github_url: "https://github.com/arkxham",
@@ -85,7 +80,7 @@ const initialProfiles = [
     display_name: "Slos",
     avatar_url: null,
     background_image: null,
-    description: "",
+    description: "66",
     twitter_url: "https://twitter.com/slosgpx",
     twitch_url: "https://twitch.tv/sl0s",
     github_url: "https://github.com/80dropz",
@@ -106,7 +101,7 @@ const initialProfiles = [
   {
     id: "5688fe08-2150-49f5-ae25-1c35528a8fd1",
     username: "N333mo",
-    display_name: "N333mo",
+    display_name: "N333MO",
     avatar_url: null,
     background_image: null,
     description: "",
@@ -145,7 +140,7 @@ const initialProfiles = [
     display_name: "Jack",
     avatar_url: null,
     background_image: null,
-    description: "",
+    description: "Mercury",
     twitter_url: "https://twitter.com/UpdateStable",
     twitch_url: "https://twitch.tv/freedm_",
     github_url: "https://github.com/jack",
@@ -189,8 +184,8 @@ const initialProfiles = [
   },
   {
     id: "0d69999e-11f1-41d0-b625-58445a06c63c",
-    username: "rtmonly",
-    display_name: "rtmonly",
+    username: "Rtmonly",
+    display_name: "RTMONLY",
     avatar_url: null,
     background_image: null,
     description: "",
@@ -200,6 +195,16 @@ const initialProfiles = [
     steam_url: "https://steamcommunity.com/id/rtmonly/",
   },
 ]
+
+// Type for user files
+type UserFiles = {
+  [bucket: string]: {
+    name: string
+    publicUrl: string
+    path: string
+    bucket: string
+  }[]
+}
 
 export default function DesktopPage() {
   const [profiles, setProfiles] = useState(initialProfiles)
@@ -216,34 +221,8 @@ export default function DesktopPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const router = useRouter()
   const supabase = getSupabaseBrowser()
-
-  const [showSettings, setShowSettings] = useState(false)
-  const [volume, setVolume] = useState(20)
-  const [theme, setTheme] = useState<"dark" | "light">("dark")
-  const [showClock, setShowClock] = useState(true)
-  const [autoPlayMusic, setAutoPlayMusic] = useState(true)
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = Number.parseInt(e.target.value)
-    setVolume(newVolume)
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume / 100
-    }
-  }
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100
-    }
-  }, [volume])
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }
-
-  const handleSettingsClick = () => {
-    setShowSettings(!showSettings)
-  }
+  const [descriptions, setDescriptions] = useState<Record<string, string>>({})
+  const [profileBios, setProfileBios] = useState<Record<string, string>>({})
 
   // Fetch all user files from the API
   const fetchAllUserFiles = async () => {
@@ -258,16 +237,27 @@ export default function DesktopPage() {
 
       for (const profile of profiles) {
         try {
-          // Use client-side function instead of API call
-          const result = await fetchUserFiles(profile.id)
+          const response = await fetch("/api/user-files", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId: profile.id }),
+          })
 
-          if (result.success && result.files) {
-            newUserFiles[profile.id] = result.files
+          if (!response.ok) {
+            throw new Error(`Error fetching files: ${response.statusText}`)
+          }
+
+          const data = await response.json()
+
+          if (data.success && data.files) {
+            newUserFiles[profile.id] = data.files
 
             // Extract profile picture
-            if (result.files["profile-picture"] && result.files["profile-picture"].length > 0) {
+            if (data.files["profile-picture"] && data.files["profile-picture"].length > 0) {
               // Find a file that starts with "pic."
-              const picFile = result.files["profile-picture"].find((file: any) => file.name.startsWith("pic."))
+              const picFile = data.files["profile-picture"].find((file: any) => file.name.startsWith("pic."))
 
               if (picFile) {
                 newProfileImages[profile.id] = picFile.publicUrl
@@ -275,9 +265,9 @@ export default function DesktopPage() {
             }
 
             // Extract background image
-            if (result.files["backgrounds"] && result.files["backgrounds"].length > 0) {
+            if (data.files["backgrounds"] && data.files["backgrounds"].length > 0) {
               // Find a file that starts with "bg."
-              const bgFile = result.files["backgrounds"].find((file: any) => file.name.startsWith("bg."))
+              const bgFile = data.files["backgrounds"].find((file: any) => file.name.startsWith("bg."))
 
               if (bgFile) {
                 newBackgroundImages[profile.id] = bgFile.publicUrl
@@ -285,9 +275,9 @@ export default function DesktopPage() {
             }
 
             // Extract song file
-            if (result.files["songs"] && result.files["songs"].length > 0) {
+            if (data.files["songs"] && data.files["songs"].length > 0) {
               // Find any song file (they should start with "song.")
-              const songFile = result.files["songs"].find((file: any) => file.name.startsWith("song"))
+              const songFile = data.files["songs"].find((file: any) => file.name.startsWith("song"))
 
               if (songFile) {
                 newProfileSongs[profile.id] = songFile.publicUrl
@@ -314,6 +304,53 @@ export default function DesktopPage() {
                 }
               }
             }
+
+            // Extract bio file
+            if (data.files["descriptions"] && data.files["descriptions"].length > 0) {
+              // Find the bio file
+              const bioFile = data.files["descriptions"].find((file: any) => file.name === "bio.txt")
+
+              if (bioFile) {
+                // Download the bio file content
+                try {
+                  const bioResponse = await fetch(bioFile.publicUrl)
+                  if (bioResponse.ok) {
+                    const bioText = await bioResponse.text()
+                    // Store the bio text
+                    const newDescriptions = { ...descriptions }
+                    newDescriptions[profile.id] = bioText
+                    setDescriptions(newDescriptions)
+                  }
+                } catch (error) {
+                  console.error(`Error downloading bio for ${profile.id}:`, error)
+                }
+              }
+            }
+
+            // Extract description file
+            if (data.files["descriptions"] && data.files["descriptions"].length > 0) {
+              // Find the description file
+              const descFile = data.files["descriptions"].find((file: any) => file.name === "description.txt")
+
+              if (descFile) {
+                // Download the description file content
+                try {
+                  const descResponse = await fetch(descFile.publicUrl)
+                  if (descResponse.ok) {
+                    const descText = await descResponse.text()
+                    newUserFiles[profile.id] = {
+                      ...newUserFiles[profile.id],
+                      description: descText,
+                    }
+
+                    // Store the description text
+                    descriptions[profile.id] = descText
+                  }
+                } catch (error) {
+                  console.error(`Error downloading description for ${profile.id}:`, error)
+                }
+              }
+            }
           }
         } catch (error) {
           console.error(`Error fetching files for user ${profile.id}:`, error)
@@ -327,16 +364,16 @@ export default function DesktopPage() {
       setProfileSongs(newProfileSongs)
 
       // Auto-play song for the initially selected profile
-      if (selectedProfile && newProfileSongs[selectedProfile.id]) {
+      if (selectedProfile && profileSongs[selectedProfile.id]) {
         if (!audioRef.current) {
-          const audio = new Audio(newProfileSongs[selectedProfile.id])
+          const audio = new Audio(profileSongs[selectedProfile.id])
           audio.volume = 0.2
           audioRef.current = audio
 
           // Get the song name
-          if (newUserFiles[selectedProfile.id] && newUserFiles[selectedProfile.id]["songs"]) {
-            const songFile = newUserFiles[selectedProfile.id]["songs"].find(
-              (file) => file.publicUrl === newProfileSongs[selectedProfile.id],
+          if (userFiles[selectedProfile.id] && userFiles[selectedProfile.id]["songs"]) {
+            const songFile = userFiles[selectedProfile.id]["songs"].find(
+              (file) => file.publicUrl === profileSongs[selectedProfile.id],
             )
             if (songFile) {
               setCurrentSongName(songFile.name.replace(/^song-/, "").replace(/\.[^/.]+$/, ""))
@@ -421,15 +458,13 @@ export default function DesktopPage() {
           }
         }
 
-        // Only auto-play if the setting is enabled
-        if (autoPlayMusic) {
-          audioRef.current.play().catch((err) => console.log("Could not autoplay:", err))
-          setIsPlaying(true)
-        }
+        // Replace this conditional with automatic playing
+        audioRef.current.play().catch((err) => console.log("Could not autoplay:", err))
+        setIsPlaying(true)
       } else {
         // Create a new audio element
         const audio = new Audio(profileSongs[profile.id])
-        audio.volume = volume / 100
+        audio.volume = 0.2
         audioRef.current = audio
 
         // Get the song name from userFiles
@@ -440,11 +475,9 @@ export default function DesktopPage() {
           }
         }
 
-        // Only auto-play if the setting is enabled
-        if (autoPlayMusic) {
-          audio.play().catch((err) => console.log("Could not autoplay:", err))
-          setIsPlaying(true)
-        }
+        // Replace this conditional with automatic playing
+        audio.play().catch((err) => console.log("Could not autoplay:", err))
+        setIsPlaying(true)
       }
     } else {
       // No song for this profile
@@ -506,12 +539,8 @@ export default function DesktopPage() {
           <div className="flex items-center">
             {/* Clock on the left */}
             <div className="flex items-center space-x-2 min-w-[180px]">
-              {showClock && (
-                <>
-                  <Clock className="h-4 w-4 text-yellow-500" />
-                  <div className="text-sm font-mono">{formatTime(currentTime)}</div>
-                </>
-              )}
+              <Clock className="h-4 w-4 text-yellow-500" />
+              <div className="text-sm font-mono">{formatTime(currentTime)}</div>
             </div>
 
             {/* Centered profiles */}
@@ -568,12 +597,25 @@ export default function DesktopPage() {
       <div className="flex flex-1">
         {/* Sidebar */}
         <div className="w-24 bg-black/70 border-r border-gray-800 flex flex-col items-center py-4 space-y-8">
-          <div
-            className="flex flex-col items-center cursor-pointer hover:text-yellow-400 transition-colors"
-            onClick={handleSettingsClick}
-          >
+          <div className="flex flex-col items-center">
+            <Folder className="text-yellow-500 w-8 h-8" />
+            <span className="text-xs mt-1">Documents</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <Folder className="text-yellow-500 w-8 h-8" />
+            <span className="text-xs mt-1">Pictures</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <User className="text-purple-500 w-8 h-8" />
+            <span className="text-xs mt-1">Profiles</span>
+          </div>
+          <div className="flex flex-col items-center">
             <Settings className="text-gray-400 w-8 h-8" />
             <span className="text-xs mt-1">Settings</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <FolderOpen className="text-yellow-500 w-8 h-8" />
+            <span className="text-xs mt-1">Directory</span>
           </div>
           <div
             className="flex flex-col items-center cursor-pointer hover:text-yellow-400 transition-colors"
@@ -605,7 +647,9 @@ export default function DesktopPage() {
             </div>
 
             {/* Description */}
-            <p className="text-gray-300 mb-8 text-lg">{selectedProfile?.description}</p>
+            {descriptions[selectedProfile?.id] && (
+              <p className="text-gray-300 mb-8 text-lg">{descriptions[selectedProfile?.id]}</p>
+            )}
 
             {/* Social Media Buttons - Centered */}
             <div className="flex justify-center space-x-4 mb-6">
@@ -651,91 +695,6 @@ export default function DesktopPage() {
           </div>
         </div>
       </div>
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full border border-gray-700 shadow-xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-yellow-400">Settings</h2>
-              <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-white">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Volume Control */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium flex items-center">
-                    <Volume2 className="mr-2 h-4 w-4" />
-                    Volume
-                  </label>
-                  <span className="text-sm text-gray-400">{volume}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
-
-              {/* Theme Toggle */}
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium flex items-center">
-                  {theme === "dark" ? <Moon className="mr-2 h-4 w-4" /> : <Sun className="mr-2 h-4 w-4" />}
-                  Theme
-                </label>
-                <button
-                  onClick={toggleTheme}
-                  className={`px-3 py-1 rounded-full text-xs ${
-                    theme === "dark" ? "bg-gray-700 text-gray-300" : "bg-yellow-500 text-black"
-                  }`}
-                >
-                  {theme === "dark" ? "Dark Mode" : "Light Mode"}
-                </button>
-              </div>
-
-              {/* Clock Toggle */}
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium flex items-center">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Show Clock
-                </label>
-                <label className="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showClock}
-                    onChange={() => setShowClock(!showClock)}
-                    className="sr-only peer"
-                  />
-                  <div className="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                </label>
-              </div>
-
-              {/* Auto-play Music Toggle */}
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium flex items-center">
-                  <Music className="mr-2 h-4 w-4" />
-                  Auto-play Music
-                </label>
-                <label className="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={autoPlayMusic}
-                    onChange={() => setAutoPlayMusic(!autoPlayMusic)}
-                    className="sr-only peer"
-                  />
-                  <div className="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Bottom bar */}
       <div className="bg-black/80 border-t border-gray-800 p-2">

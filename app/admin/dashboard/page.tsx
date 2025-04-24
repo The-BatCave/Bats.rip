@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { getSupabaseBrowser } from "@/lib/supabase"
 import type { Profile } from "@/types/database"
-import { fetchUserFiles, uploadFile } from "@/lib/client-storage"
-import type { UserFiles } from "@/lib/client-storage"
 import {
   LogOut,
   AlertTriangle,
@@ -32,6 +30,16 @@ const VIDEO_EXTENSIONS = ["mp4", "mov", "avi", "wmv", "flv", "mkv", "webm", "m4v
 
 // List of allowed audio extensions
 const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a", "flac", "aac"]
+
+// Type for user files
+type UserFiles = {
+  [bucket: string]: {
+    name: string
+    publicUrl: string
+    path: string
+    bucket: string
+  }[]
+}
 
 export default function AdminDashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -89,7 +97,7 @@ export default function AdminDashboardPage() {
           setSteamUrl(userProfile.steam_url || "")
 
           // Fetch user files from API
-          await fetchUserFilesData(user.id)
+          await fetchUserFiles(user.id)
         } else {
           // Create a default profile if none exists
           const defaultProfile = {
@@ -165,36 +173,53 @@ export default function AdminDashboardPage() {
     }
   }, [profile])
 
-  // Replace fetchUserFiles with:
-  const fetchUserFilesData = async (userId: string) => {
+  // Function to fetch user files from API
+  const fetchUserFiles = async (userId: string) => {
     try {
       setRefreshingImages(true)
 
-      // Use client-side function instead of API call
-      const result = await fetchUserFiles(userId)
+      const response = await fetch("/api/user-files", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      })
 
-      if (result.success && result.files) {
-        setUserFiles(result.files)
+      if (!response.ok) {
+        throw new Error(`Error fetching files: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.files) {
+        setUserFiles(data.files)
 
         // Extract profile picture
-        if (result.files["profile-picture"] && result.files["profile-picture"].length > 0) {
-          const picFile = result.files["profile-picture"].find((file) => file.name.startsWith("pic."))
+        if (data.files["profile-picture"] && data.files["profile-picture"].length > 0) {
+          // Find a file that starts with "pic."
+          const picFile = data.files["profile-picture"].find((file: any) => file.name.startsWith("pic."))
+
           if (picFile) {
             setProfileImageUrl(picFile.publicUrl)
           }
         }
 
         // Extract background image
-        if (result.files["backgrounds"] && result.files["backgrounds"].length > 0) {
-          const bgFile = result.files["backgrounds"].find((file) => file.name.startsWith("bg."))
+        if (data.files["backgrounds"] && data.files["backgrounds"].length > 0) {
+          // Find a file that starts with "bg."
+          const bgFile = data.files["backgrounds"].find((file: any) => file.name.startsWith("bg."))
+
           if (bgFile) {
             setBackgroundImageUrl(bgFile.publicUrl)
           }
         }
 
         // Extract song file
-        if (result.files["songs"] && result.files["songs"].length > 0) {
-          const songFile = result.files["songs"].find((file) => file.name.startsWith("song-"))
+        if (data.files["songs"] && data.files["songs"].length > 0) {
+          // Find a file that starts with "song-"
+          const songFile = data.files["songs"].find((file: any) => file.name.startsWith("song-"))
+
           if (songFile) {
             setSongUrl(songFile.publicUrl)
             setSongName(songFile.name.replace(/^song-/, ""))
@@ -238,7 +263,6 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // Replace handleAvatarUpload with:
   const handleAvatarUpload = async (file: File) => {
     try {
       setUploadingAvatar(true)
@@ -253,16 +277,33 @@ export default function AdminDashboardPage() {
       // Simplified file name: pic.{extension}
       const fileName = `pic.${fileExt}`
 
-      // Use client-side function instead of API call
-      const result = await uploadFile(file, "profile-picture", profile?.id || "", fileName)
+      // Create form data for upload
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("bucket", "profile-picture")
+      formData.append("userId", profile?.id || "")
+      formData.append("fileName", fileName)
 
-      if (!result.success) {
-        throw new Error(result.error || "Upload failed")
+      // Upload using the API route
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || "Upload failed")
       }
 
-      // Refresh user files
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || "Upload failed")
+      }
+
+      // Refresh user files to get the new URLs
       if (profile) {
-        await fetchUserFilesData(profile.id)
+        await fetchUserFiles(profile.id)
       }
 
       setNotification({
@@ -297,7 +338,6 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // Replace handleBackgroundUpload with:
   const handleBackgroundUpload = async (file: File) => {
     try {
       setUploadingBackground(true)
@@ -312,16 +352,33 @@ export default function AdminDashboardPage() {
       // Simplified file name: bg.{extension}
       const fileName = `bg.${fileExt}`
 
-      // Use client-side function instead of API call
-      const result = await uploadFile(file, "backgrounds", profile?.id || "", fileName)
+      // Create form data for upload
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("bucket", "backgrounds")
+      formData.append("userId", profile?.id || "")
+      formData.append("fileName", fileName)
 
-      if (!result.success) {
-        throw new Error(result.error || "Upload failed")
+      // Upload using the API route
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || "Upload failed")
       }
 
-      // Refresh user files
+      const data = await response.json()
+
+      if (!data.success) {
+        throw new Error(data.error || "Upload failed")
+      }
+
+      // Refresh user files to get the new URLs
       if (profile) {
-        await fetchUserFilesData(profile.id)
+        await fetchUserFiles(profile.id)
       }
 
       setNotification({
@@ -341,20 +398,64 @@ export default function AdminDashboardPage() {
 
   const updateBio = async () => {
     try {
-      const { error } = await supabase.from("profiles").update({ bio }).eq("id", profile?.id)
+      // First, update the bio in the profiles table
+      const { error: profileError } = await supabase.from("profiles").update({ bio }).eq("id", profile?.id)
 
-      if (error) throw error
+      if (profileError) throw profileError
 
+      // Update the profile state
       setProfile({
         ...profile!,
         bio,
       })
 
+      // Now save the bio to the descriptions bucket as bio.txt using the API route
+      if (profile?.id) {
+        try {
+          setNotification({
+            type: "success",
+            message: "Bio saved to profile. Saving to storage...",
+          })
+
+          // Use the API route to save the text file
+          const response = await fetch("/api/save-text", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: profile.id,
+              text: bio,
+              fileName: "bio.txt",
+              bucket: "descriptions",
+            }),
+          })
+
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || "Failed to save bio to storage")
+          }
+
+          const data = await response.json()
+
+          if (!data.success) {
+            throw new Error(data.error || "Failed to save bio to storage")
+          }
+
+          setNotification({
+            type: "success",
+            message: "Bio updated successfully and saved to storage",
+          })
+        } catch (bucketError: any) {
+          console.error("Error saving bio to storage:", bucketError)
+          setNotification({
+            type: "error",
+            message: `Bio saved to profile but failed to save to storage: ${bucketError.message}`,
+          })
+        }
+      }
+
       setEditingBio(false)
-      setNotification({
-        type: "success",
-        message: "Bio updated successfully",
-      })
     } catch (error: any) {
       console.error("Error updating bio:", error)
       setNotification({
@@ -398,7 +499,7 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // Replace refreshImages with:
+  // Function to refresh images from storage
   const refreshImages = async () => {
     try {
       setNotification({
@@ -407,7 +508,7 @@ export default function AdminDashboardPage() {
       })
 
       if (profile) {
-        await fetchUserFilesData(profile.id)
+        await fetchUserFiles(profile.id)
       }
 
       setNotification({
@@ -423,7 +524,7 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // Replace deleteSong with:
+  // Function to delete the current song
   const deleteSong = async () => {
     try {
       if (!profile?.id) return
@@ -432,8 +533,6 @@ export default function AdminDashboardPage() {
         type: "success",
         message: "Deleting song...",
       })
-
-      const supabase = getSupabaseBrowser()
 
       // List files in the songs bucket
       const { data: songFiles, error: listError } = await supabase.storage.from("songs").list(profile.id)
@@ -454,7 +553,7 @@ export default function AdminDashboardPage() {
         }
 
         // Refresh user files
-        await fetchUserFilesData(profile.id)
+        await fetchUserFiles(profile.id)
 
         setSongUrl(null)
         setSongName(null)
@@ -700,7 +799,7 @@ export default function AdminDashboardPage() {
                       message: "Song uploaded successfully",
                     })
                     if (profile) {
-                      fetchUserFilesData(profile.id)
+                      fetchUserFiles(profile.id)
                     }
                   }}
                   onError={(message) => {
