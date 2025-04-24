@@ -10,7 +10,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // No basePath needed for custom domain
+  // Add this line to fix asset paths for GitHub Pages
+  assetPrefix: './',
+  // Keep basePath empty for custom domain
   basePath: '',
   // Ensure API routes work correctly with static export
   experimental: {
