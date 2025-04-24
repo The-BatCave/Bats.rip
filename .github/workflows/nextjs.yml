@@ -30,11 +30,35 @@ jobs:
         with:
           node-version: "18"
       
-      # Skip generating package-lock.json since it's causing dependency conflicts
-      # Instead, let's just install dependencies with legacy-peer-deps flag
+      # Create a temporary fix for the API routes
+      - name: Fix API routes for static export
+        run: |
+          mkdir -p .github/temp-fixes
+          echo "// This is a temporary fix for static export" > .github/temp-fixes/fix-api-routes.js
+          echo "const fs = require('fs');" >> .github/temp-fixes/fix-api-routes.js
+          echo "const path = require('path');" >> .github/temp-fixes/fix-api-routes.js
+          echo "const apiDir = path.join(process.cwd(), 'app/api');" >> .github/temp-fixes/fix-api-routes.js
+          echo "if (fs.existsSync(apiDir)) {" >> .github/temp-fixes/fix-api-routes.js
+          echo "  const files = fs.readdirSync(apiDir, { recursive: true });" >> .github/temp-fixes/fix-api-routes.js
+          echo "  files.forEach(file => {" >> .github/temp-fixes/fix-api-routes.js
+          echo "    const filePath = path.join(apiDir, file);" >> .github/temp-fixes/fix-api-routes.js
+          echo "    if (fs.statSync(filePath).isFile() && (filePath.endsWith('route.ts') || filePath.endsWith('route.js'))) {" >> .github/temp-fixes/fix-api-routes.js
+          echo "      let content = fs.readFileSync(filePath, 'utf8');" >> .github/temp-fixes/fix-api-routes.js
+          echo "      if (!content.includes('export const dynamic')) {" >> .github/temp-fixes/fix-api-routes.js
+          echo "        content = \"export const dynamic = 'force-static';\\n\" + content;" >> .github/temp-fixes/fix-api-routes.js
+          echo "        fs.writeFileSync(filePath, content);" >> .github/temp-fixes/fix-api-routes.js
+          echo "        console.log('Added dynamic = force-static to', filePath);" >> .github/temp-fixes/fix-api-routes.js
+          echo "      }" >> .github/temp-fixes/fix-api-routes.js
+          echo "    }" >> .github/temp-fixes/fix-api-routes.js
+          echo "  });" >> .github/temp-fixes/fix-api-routes.js
+          echo "}" >> .github/temp-fixes/fix-api-routes.js
       
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      
+      # Run the API route fix script
+      - name: Apply API route fixes
+        run: node .github/temp-fixes/fix-api-routes.js
       
       - name: Build with Next.js
         env:
@@ -53,7 +77,7 @@ jobs:
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           # Serverless API URL
           NEXT_PUBLIC_SERVERLESS_API_URL: ${{ secrets.NEXT_PUBLIC_SERVERLESS_API_URL }}
-        run: npm run build --legacy-peer-deps
+        run: npm run build
       
       # Deploy to the github-pages branch
       - name: Deploy to github-pages branch
